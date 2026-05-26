@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Bloom 财务</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#ead5dc", "inverse-on-surface": "#ffecf2",
+            "secondary-container": "#e7e1ae", "primary-container": "#ffb7c5",
+            "tertiary-fixed-dim": "#96d5a0", "on-tertiary": "#ffffff",
+            "inverse-surface": "#3a2d32", "on-tertiary-container": "#256036",
+            "on-secondary-fixed-variant": "#4b4822", "outline-variant": "#d6c2c4",
+            "error-container": "#ffdad6", "secondary": "#636037",
+            "on-secondary-fixed": "#1e1c00", "surface-container-low": "#fff0f4",
+            "surface-container-highest": "#f2dde4", "surface-container-high": "#f8e3ea",
+            "on-surface": "#24181d", "secondary-fixed": "#eae4b1",
+            "on-error-container": "#93000a", "on-tertiary-fixed": "#00210b",
+            "primary-fixed-dim": "#fbb3c1", "on-primary": "#ffffff",
+            "background": "#fff8f8", "surface-container": "#fee8f0",
+            "primary-fixed": "#ffd9df", "surface-tint": "#864e5a",
+            "surface": "#fff8f8", "error": "#ba1a1a",
+            "tertiary-fixed": "#b2f2bb", "on-background": "#24181d",
+            "on-secondary-container": "#67643b", "surface-container-lowest": "#ffffff",
+            "on-primary-container": "#7b4551", "on-error": "#ffffff",
+            "tertiary": "#2f6a3f", "on-primary-fixed": "#360c19",
+            "outline": "#837375", "surface-bright": "#fff8f8",
+            "primary": "#864e5a", "surface-variant": "#f2dde4",
+            "on-secondary": "#ffffff", "on-surface-variant": "#514345",
+            "inverse-primary": "#fbb3c1", "on-primary-fixed-variant": "#6b3743",
+            "secondary-fixed-dim": "#cdc897", "tertiary-container": "#9ad9a4",
+            "on-tertiary-fixed-variant": "#145129"
+          },
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+          "spacing": { "base": "8px", "element-gap": "16px", "section-gap": "40px", "container-padding": "24px", "gutter": "16px" },
+          "fontFamily": { "body-lg": ["Be Vietnam Pro"], "body-md": ["Be Vietnam Pro"], "display-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "label-sm": ["Be Vietnam Pro"] },
+          "fontSize": { "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }] }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #fff8f8; font-family: 'Be Vietnam Pro', sans-serif; }
+    .soft-glow { box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4); }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .bg-cherry-gradient { background: linear-gradient(135deg, #fff8f8 0%, #fee8f0 100%); }
+    .chart-bar { transition: height 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-md antialiased">
+  <!-- Sidebar Navigation (iframe) -->
+  <iframe id="sidebar-iframe" src="components/sidebar.html" class="fixed left-0 top-0 h-screen w-[288px] z-40" frameborder="0" scrolling="no"></iframe>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-[288px] min-h-screen bg-cherry-gradient pb-32 md:pb-container-padding">
+    <!-- Header (iframe) -->
+    <iframe id="header-iframe" src="components/header.html?v=9" class="sticky top-0 z-40 w-full h-[72px]" frameborder="0" scrolling="no"></iframe>
+
+    <!-- Dynamic Content Container -->
+    <div id="content-area" class="p-6"></div>
+  </main>
+
+  <script>
+    var API_BASE = 'http://localhost:8080/api/v1';
+
+    // ========== API Service Layer ==========
+    function getToken() { return localStorage.getItem('access_token'); }
+    function getRefreshToken() { return localStorage.getItem('refresh_token'); }
+
+    async function apiGet(path) {
+      var token = getToken();
+      if (!token) throw new Error('NOT_AUTHENTICATED');
+      var res = await fetch(API_BASE + path, {
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      });
+      if (res.status === 401) {
+        // Try refresh
+        var refreshed = await tryRefresh();
+        if (refreshed) {
+          token = getToken();
+          res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+          });
+        }
+      }
+      if (!res.ok) throw new Error('API_ERROR_' + res.status);
+      var json = await res.json();
+      if (json.code !== 200 && json.code !== 201) throw new Error(json.message || 'API_ERROR');
+      return json.data;
+    }
+
+    async function apiPost(path, body) {
+      var token = getToken();
+      if (!token) throw new Error('NOT_AUTHENTICATED');
+      var res = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401) {
+        var refreshed = await tryRefresh();
+        if (refreshed) {
+          token = getToken();
+          res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        }
+      }
+      if (!res.ok) throw new Error('API_ERROR_' + res.status);
+      var json = await res.json();
+      if (json.code !== 200 && json.code !== 201) throw new Error(json.message || 'API_ERROR');
+      return json.data;
+    }
+
+    async function apiPut(path, body) {
+      var token = getToken();
+      if (!token) throw new Error('NOT_AUTHENTICATED');
+      var res = await fetch(API_BASE + path, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401) {
+        var refreshed = await tryRefresh();
+        if (refreshed) {
+          token = getToken();
+          res = await fetch(API_BASE + path, {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        }
+      }
+      if (!res.ok) throw new Error('API_ERROR_' + res.status);
+      var json = await res.json();
+      if (json.code !== 200 && json.code !== 201) throw new Error(json.message || 'API_ERROR');
+      return json.data;
+    }
+
+    async function tryRefresh() {
+      var refreshToken = getRefreshToken();
+      if (!refreshToken) return false;
+      try {
+        var res = await fetch(API_BASE + '/auth/refresh-token', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + refreshToken }
+        });
+        if (res.ok) {
+          var json = await res.json();
+          if (json.code === 200) {
+            localStorage.setItem('access_token', json.data);
+            return true;
+          }
+        }
+      } catch (e) { /* silent fail */ }
+      return false;
+    }
+
+    // ========== Utilities ==========
+    function formatCurrency(value) {
+      if (value === null || value === undefined) return '¥0.00';
+      return '¥' + parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function formatPercent(value) {
+      if (value === null || value === undefined) return '0%';
+      return parseFloat(value).toFixed(1) + '%';
+    }
+
+    // Global bookkeeping filter state
+    var _bkSearchText = '', _bkStartDate = null, _bkEndDate = null, _bkCategoryId = null, _bkOrigData = null;
+
+    function showError(msg) {
+      var el = document.createElement('div');
+      el.className = 'text-center py-8 text-red-500';
+      el.textContent = msg;
+      document.getElementById('content-area').innerHTML = '';
+      document.getElementById('content-area').appendChild(el);
+    }
+
+    // ========== Page Renderers ==========
+    // Each renderer: (1) show skeleton, (2) fetch data, (3) call renderFn with data
+    var pageRenderers = {
+      'home.html': async function() {
+        var data = await apiGet('/dashboard');
+        renderHome(data);
+      },
+      'accounts.html': async function() {
+        var data = await apiGet('/accounts/summary');
+        renderAccounts(data);
+      },
+      'bookkeeping.html': async function() {
+        var data = await apiGet('/transactions/summary');
+        renderBookkeeping(data);
+      },
+      'analysis.html': async function() {
+        var data = await apiGet('/assets/allocation');
+        renderAnalysis(data);
+      },
+      'goals.html': async function() {
+        var data = await apiGet('/goals');
+        renderGoals(data);
+      }
+    };
+
+    // ========== Dashboard Renderer ==========
+    function renderHome(data) {
+      var el = document.getElementById('totalNetWorth');
+      if (el) el.textContent = formatCurrency(data.totalNetWorth);
+      var el2 = document.getElementById('growthRate');
+      if (el2) el2.textContent = '本月增长 ' + formatPercent(data.monthGrowthRate);
+      var el3 = document.getElementById('healthScore');
+      if (el3) el3.textContent = data.healthScore || 0;
+      var el4 = document.getElementById('healthDescription');
+      if (el4) el4.textContent = data.healthDescription || '';
+      var el5 = document.getElementById('healthCircle');
+      if (el5) {
+        var circumference = 2 * Math.PI * 58;
+        el5.style.strokeDashoffset = circumference * (1 - (data.healthScore || 0) / 100);
+      }
+      var el6 = document.getElementById('monthIncome');
+      if (el6) el6.textContent = formatCurrency(data.monthIncome);
+      var el7 = document.getElementById('monthExpense');
+      if (el7) el7.textContent = formatCurrency(data.monthExpense);
+      var el8 = document.getElementById('incomeCount');
+      if (el8) el8.textContent = (data.incomeCount || 0) + ' 笔交易';
+      var el9 = document.getElementById('expenseCount');
+      if (el9) el9.textContent = (data.expenseCount || 0) + ' 笔交易';
+
+      // Budget alerts
+      if (data.budgetAlerts && data.budgetAlerts.length > 0) {
+        var budget = data.budgetAlerts[0];
+        var bn = document.getElementById('budgetCategoryName');
+        if (bn) bn.textContent = budget.categoryName || '预算提醒';
+        var bp = document.getElementById('budgetProgressBar');
+        if (bp) bp.style.width = Math.min(budget.usedPercent, 100) + '%';
+        var bd = document.getElementById('budgetDescription');
+        if (bd) bd.textContent = '已使用每月 ' + formatCurrency(budget.budgetAmount) + ' 限额的 ' + budget.usedPercent + '%';
+      }
+
+      // Bill reminders
+      var billList = document.getElementById('billRemindersList');
+      if (billList) {
+        billList.innerHTML = '';
+        if (data.billReminders && data.billReminders.length > 0) {
+          data.billReminders.forEach(function(bill) {
+            var icon = bill.icon || 'bolt';
+            var borderColor = bill.daysUntilDue <= 2 ? 'border-primary' : bill.daysUntilDue <= 5 ? 'border-tertiary-container' : 'border-secondary-container';
+            var billItem = document.createElement('div');
+            billItem.className = 'flex items-center gap-4 p-4 rounded-[24px] bg-surface-container-low border-l-4 ' + borderColor;
+            billItem.innerHTML = '<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">' + icon + '</span></div><div><p class="font-body-md font-bold">' + bill.billName + '</p><p class="text-on-surface-variant font-label-sm">' + (bill.daysUntilDue > 0 ? bill.daysUntilDue + ' 天后到期' : '已逾期') + ' • ' + formatCurrency(bill.amount) + '</p></div>';
+            billList.appendChild(billItem);
+          });
+        } else {
+          billList.innerHTML = '<p class="text-on-surface-variant col-span-3 text-center py-8">暂无待还账单</p>';
+        }
+      }
+
+      // Mini chart
+      if (data.netWorthTrend && data.netWorthTrend.length > 0) {
+        var bars = document.querySelectorAll('#miniChart .chart-bar');
+        var values = data.netWorthTrend.map(function(t) { return parseFloat(t.netWorth) || 0; });
+        var maxValue = Math.max.apply(null, values);
+        var minValue = Math.min.apply(null, values);
+        var range = maxValue - minValue || 1;
+        bars.forEach(function(bar, index) {
+          if (values[index] !== undefined) {
+            var heightPercent = ((values[index] - minValue) / range * 50) + 40;
+            bar.style.height = heightPercent + '%';
+          }
+        });
+      }
+    }
+
+    // ========== Accounts Renderer ==========
+    function renderAccounts(data) {
+      window._accountsData = data; // Store for card detail modals
+      var loading = document.getElementById('loading-state');
+      if (loading) loading.style.display = 'none';
+      var totalCard = document.getElementById('total-balance-card');
+      if (totalCard) totalCard.classList.remove('hidden');
+      var summaryBubble = document.getElementById('summary-bubble');
+      if (summaryBubble) summaryBubble.classList.remove('hidden');
+
+      var el = document.getElementById('total-net-worth');
+      if (el) el.textContent = formatCurrency(data.totalNetWorth);
+      var healthEl = document.getElementById('health-status');
+      if (healthEl && data.healthStatus) healthEl.textContent = data.healthStatus;
+      var growthEl = document.getElementById('growth-text');
+      if (growthEl) growthEl.textContent = '本月净资产增长 ' + formatPercent(data.monthlyGrowthRate) + '。';
+
+      if (data.bankCardSummary) {
+        var bcBalance = document.getElementById('bank-card-balance');
+        if (bcBalance) bcBalance.textContent = formatCurrency(data.bankCardSummary.balance);
+        var bcCount = document.getElementById('bank-card-count');
+        if (bcCount) bcCount.textContent = (data.bankCardSummary.count || 0) + ' 活跃';
+        var bcCard = document.getElementById('bank-card');
+        if (bcCard) bcCard.classList.remove('hidden');
+      }
+      if (data.investmentSummary) {
+        var invBalance = document.getElementById('investment-balance');
+        if (invBalance) invBalance.textContent = formatCurrency(data.investmentSummary.balance);
+        var invRate = document.getElementById('investment-rate');
+        if (invRate) invRate.textContent = '+' + formatPercent(data.investmentSummary.percentage);
+        var invCard = document.getElementById('investment-card');
+        if (invCard) invCard.classList.remove('hidden');
+      }
+      if (data.socialSecuritySummary) {
+        var ssBalance = document.getElementById('social-security-balance');
+        if (ssBalance) ssBalance.textContent = formatCurrency(data.socialSecuritySummary.balance);
+        var ssDate = document.getElementById('social-security-date');
+        if (ssDate && data.socialSecuritySummary.lastPaymentDate) ssDate.textContent = '最近缴存: ' + data.socialSecuritySummary.lastPaymentDate;
+        var ssCard = document.getElementById('social-security-card');
+        if (ssCard) ssCard.classList.remove('hidden');
+      }
+      if (data.liabilitySummary) {
+        var liabAmount = document.getElementById('liability-amount');
+        if (liabAmount) liabAmount.textContent = '-' + formatCurrency(data.liabilitySummary.totalAmount);
+        var liabCard = document.getElementById('liability-card');
+        if (liabCard) liabCard.classList.remove('hidden');
+      }
+      if (data.fixedAssetSummary) {
+        var faAmount = document.getElementById('fixed-asset-amount');
+        if (faAmount) faAmount.textContent = formatCurrency(data.fixedAssetSummary.totalAmount);
+        var propCount = document.getElementById('property-count');
+        if (propCount) propCount.textContent = '房产 (' + (data.fixedAssetSummary.propertyCount || 0) + ')';
+        var vehCount = document.getElementById('vehicle-count');
+        if (vehCount) vehCount.textContent = '汽车 (' + (data.fixedAssetSummary.vehicleCount || 0) + ')';
+        var faCard = document.getElementById('fixed-asset-card');
+        if (faCard) faCard.classList.remove('hidden');
+      }
+    }
+
+    // ========== Bookkeeping Renderer ==========
+    function renderBookkeeping(data) {
+      var loading = document.getElementById('loading-state');
+      if (loading) loading.style.display = 'none';
+      var summarySection = document.getElementById('summary-section');
+      if (summarySection) summarySection.classList.remove('hidden');
+      var filterSection = document.getElementById('filter-section');
+      if (filterSection) filterSection.classList.remove('hidden');
+      var txSection = document.getElementById('transaction-section');
+      if (txSection) txSection.classList.remove('hidden');
+
+      // Store original data for filtering
+      _bkOrigData = data.transactions ? JSON.parse(JSON.stringify(data.transactions)) : [];
+      _bkSearchText = '';
+      _bkStartDate = null;
+      _bkEndDate = null;
+      _bkCategoryId = null;
+
+      var el = document.getElementById('monthly-expense');
+      if (el) el.textContent = '-' + formatCurrency(data.monthlyExpense);
+      var el2 = document.getElementById('monthly-income');
+      if (el2) el2.textContent = '+' + formatCurrency(data.monthlyIncome);
+      var el3 = document.getElementById('daily-average');
+      if (el3) el3.textContent = formatCurrency(data.dailyAverageExpense);
+      var el4 = document.getElementById('budget-status');
+      if (el4 && data.budgetStatus) el4.textContent = data.budgetStatus;
+      var el5 = document.getElementById('month-title');
+      if (el5 && data.monthInfo) el5.textContent = data.monthInfo;
+      var reimbAmt = document.getElementById('reimbursable-amount');
+      if (reimbAmt) reimbAmt.textContent = formatCurrency(data.reimbursableAmount);
+      var reimbCount = document.getElementById('reimbursable-count');
+      if (reimbCount) reimbCount.textContent = data.reimbursableCount || 0;
+
+      var txListEl = document.getElementById('transaction-list');
+      if (txListEl && data.transactions) {
+        txListEl.innerHTML = '';
+        data.transactions.forEach(function(dayTx) {
+          dayTx.transactions.forEach(function(tx) {
+            var item = document.createElement('div');
+            item.className = 'flex items-center gap-4 p-4 bg-white rounded-2xl';
+            var typeColor = tx.transactionType === 1 ? 'text-tertiary' : 'text-error';
+            var typeIcon = tx.transactionType === 1 ? 'arrow_downward' : 'arrow_upward';
+            item.innerHTML = '<div class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center ' + typeColor + '"><span class="material-symbols-outlined">' + typeIcon + '</span></div><div class="flex-1"><p class="font-body-md font-bold">' + (tx.categoryName || tx.merchantName || '未知') + '</p><p class="text-on-surface-variant font-label-sm">' + (tx.description || '') + '</p></div><div class="text-right"><p class="font-body-md font-bold ' + typeColor + '">' + (tx.transactionType === 1 ? '+' : '-') + formatCurrency(tx.amount) + '</p></div>';
+            txListEl.appendChild(item);
+          });
+        });
+        if (txListEl.children.length === 0) txListEl.innerHTML = '<p class="text-on-surface-variant text-center py-8 col-span-3">暂无交易记录</p>';
+      }
+    }
+
+    // ========== Analysis Renderer ==========
+    function renderAnalysis(data) {
+      var chartEl = document.getElementById('allocation-chart');
+      if (chartEl && data.allocationList) {
+        chartEl.innerHTML = '';
+        data.allocationList.forEach(function(item) {
+          var row = document.createElement('div');
+          row.className = 'flex items-center gap-4 p-4 bg-white rounded-2xl';
+          row.innerHTML = '<div class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">account_balance</span></div><div class="flex-1"><p class="font-body-md font-bold">' + item.typeName + '</p><p class="text-on-surface-variant font-label-sm">占比 ' + item.percentage + '%</p></div><div class="text-right"><p class="font-body-md font-bold">' + formatCurrency(item.amount) + '</p></div>';
+          chartEl.appendChild(row);
+        });
+        if (chartEl.children.length === 0) chartEl.innerHTML = '<p class="text-on-surface-variant text-center py-8">暂无资产数据</p>';
+      }
+      var totalEl = document.getElementById('total-asset-value');
+      if (totalEl) totalEl.textContent = formatCurrency(data.totalAsset);
+    }
+
+    // ========== Goals Renderer ==========
+    function renderGoals(data) {
+      var gridEl = document.getElementById('goals-grid');
+      // API returns { records: [] } or { data: { records: [] } }
+      var goals = data.records || data.data || data.items || [];
+
+      // Update summary header with real data
+      var summaryProgress = 0;
+      var tipText = '暂无理财目标';
+      if (Array.isArray(goals) && goals.length > 0) {
+        var totalProgress = 0;
+        var validCount = 0;
+        goals.forEach(function(goal) {
+          if (goal.progress !== undefined && goal.progress !== null) {
+            totalProgress += parseFloat(goal.progress);
+            validCount++;
+          }
+        });
+        if (validCount > 0) {
+          summaryProgress = totalProgress / validCount;
+        }
+        if (summaryProgress >= 80) {
+          tipText = '太棒了！目标达成率非常高';
+        } else if (summaryProgress >= 50) {
+          tipText = '继续保持！您的目标进展顺利';
+        } else if (summaryProgress >= 25) {
+          tipText = '稳扎稳打！您的目标正在逐步实现';
+        } else {
+          tipText = '开始行动！每一步都离目标更近';
+        }
+      }
+
+      // Update progress circle and percentage (cap display at 100%)
+      var svgCircle = document.querySelector('.goals-summary svg circle:nth-child(2)');
+      if (svgCircle && summaryProgress >= 0) {
+        var circumference = 351.8;
+        var dashoffset = circumference * (1 - Math.min(summaryProgress, 100) / 100);
+        svgCircle.setAttribute('stroke-dashoffset', dashoffset.toFixed(1));
+      }
+      var percentEl = document.querySelector('.goals-summary .absolute span:first-child');
+      if (percentEl) percentEl.textContent = Math.min(summaryProgress, 9999).toFixed(0) + '%';
+
+      // Update tip text
+      var tipEl = document.querySelector('.goals-summary + div h3');
+      if (tipEl) tipEl.textContent = tipText;
+
+      // Update description paragraph with real data
+      var descEl = document.querySelector('.goals-summary + div p');
+      if (descEl && Array.isArray(goals) && goals.length > 0) {
+        var totalSaved = 0;
+        var goalCount = goals.length;
+        var earliestGoal = null;
+        goals.forEach(function(goal) {
+          totalSaved += parseFloat(goal.currentAmount || 0);
+          if (!earliestGoal || (goal.createdAt && new Date(goal.createdAt) < new Date(earliestGoal.createdAt))) {
+            earliestGoal = goal;
+          }
+        });
+        var daysCount = 0;
+        if (earliestGoal && earliestGoal.createdAt) {
+          var now = new Date();
+          var created = new Date(earliestGoal.createdAt);
+          daysCount = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+        }
+        var topGoal = goals[0].goalName || '目标';
+        var savedDisplay = totalSaved >= 10000 ? (totalSaved / 10000).toFixed(1) + '万' : totalSaved.toFixed(0);
+        descEl.textContent = '您已为' + topGoal + '储蓄了 ¥' + savedDisplay + '。共有 ' + goalCount + ' 个目标在进行中。' + (daysCount > 0 ? '已坚持 ' + daysCount + ' 天。' : '');
+      } else if (descEl) {
+        descEl.textContent = '暂无理财目标，立即开始创建您的第一个目标吧！';
+      }
+
+      // Update "理财达人" streak section
+      var streakCard = document.querySelector('h4.font-headline-md.text-on-tertiary-container')?.closest('div.p-8.rounded-2xl');
+      var streakTitle = streakCard ? streakCard.querySelector('h4') : null;
+      var streakText = streakCard ? streakCard.querySelector('p.font-body-md.text-on-tertiary-container') : null;
+      if (streakCard && Array.isArray(goals) && goals.length > 0) {
+          var streakDays = 0;
+          var firstGoal = goals[0];
+          var dateField = firstGoal.createdAt || firstGoal.createTime || firstGoal.updateTime || firstGoal.startDate;
+          if (dateField) {
+            var d = new Date(dateField);
+            if (!isNaN(d.getTime())) {
+              var now = new Date();
+              streakDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+            }
+          }
+          var title = streakDays >= 180 ? '理财大师' : streakDays >= 90 ? '理财高手' : streakDays >= 30 ? '理财达人' : streakDays >= 7 ? '理财新手' : '刚起步';
+          if (streakTitle) streakTitle.textContent = title;
+          if (streakText) streakText.textContent = '连续储蓄 ' + streakDays + ' 天' + (streakDays >= 30 ? ' 🎉' : '');
+        } else if (streakTitle) {
+          streakTitle.textContent = '理财新手';
+          if (streakText) streakText.textContent = '开始您的理财之旅';
+        }
+
+      if (gridEl) {
+        gridEl.innerHTML = '';
+        if (Array.isArray(goals) && goals.length > 0) {
+          goals.forEach(function(goal) {
+            var progressVal = goal.progress ? parseFloat(goal.progress) : 0;
+            var progressDisplay = progressVal.toFixed(1);
+            var progressWidth = Math.min(progressVal, 100).toFixed(1);
+            var statusName = goal.statusName || (goal.status === 2 ? '已完成' : goal.status === 3 ? '已放弃' : '进行中');
+            var item = document.createElement('div');
+            item.className = 'bg-white rounded-2xl p-6 soft-glow border border-white flex flex-col group transition-transform hover:scale-[1.02] cursor-pointer';
+            item.setAttribute('data-goal-id', goal.id);
+            item.innerHTML = '<div class="flex justify-between items-start mb-6"><div class="w-14 h-14 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container"><span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">star</span></div><span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full font-label-sm">' + statusName + '</span></div><h4 class="font-headline-md text-on-surface mb-1">' + goal.goalName + '</h4><p class="font-body-md text-on-surface-variant mb-6">' + (goal.goalTypeName || '') + '</p><div class="space-y-4 flex-1"><div class="flex justify-between font-label-sm text-on-surface"><span>' + formatCurrency(goal.currentAmount) + ' / ' + formatCurrency(goal.targetAmount) + '</span><span class="text-primary">' + progressDisplay + '%</span></div><div class="h-3 w-full bg-surface-container rounded-full overflow-hidden"><div class="h-full bg-primary-container rounded-full transition-all" style="width:' + progressWidth + '%"></div></div></div>';
+            gridEl.appendChild(item);
+          });
+        } else {
+          gridEl.innerHTML = '<p class="text-on-surface-variant text-center py-8 col-span-3">暂无理财目标</p>';
+        }
+        // Attach click handler to goals grid for editing
+        gridEl.addEventListener('click', function(e) {
+          var card = e.target.closest('[data-goal-id]');
+          if (card) {
+            var goalId = card.getAttribute('data-goal-id');
+            openEditGoalModal(parseInt(goalId));
+          }
+        });
+      }
+    }
+
+    // ========== Main Page Loader ==========
+    function showSkeleton() {
+      document.getElementById('content-area').innerHTML = '<div class="p-6"><div class="bg-gray-200 w-full h-64 rounded-2xl loading-skeleton"></div></div>';
+    }
+
+    // ========== Button Handler Layer ==========
+    // Re-attach click handlers after content injection
+    function attachButtonHandlers() {
+      // Modal helpers
+      function showModal(id) { var m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
+      function hideModal(id) { var m = document.getElementById(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } }
+      function closeNearestFixed(el) { el.closest('.fixed').remove(); }
+
+      // FAB buttons (attached via addEventListener, not onclick)
+      var addAccMobBtn = document.getElementById('addAccountBtnMobile');
+      var addAccDeskBtn = document.getElementById('addAccountBtnDesktop');
+      if (addAccMobBtn) addAccMobBtn.addEventListener('click', function() { showModal('addAccountModal'); });
+      if (addAccDeskBtn) addAccDeskBtn.addEventListener('click', function() { showModal('addAccountModal'); });
+
+      var addGoalBtn = document.getElementById('addGoalBtn');
+      if (addGoalBtn) addGoalBtn.addEventListener('click', function() { openAddGoalModal(); });
+
+      var aiChatBtn = document.getElementById('aiChatBtn');
+      if (aiChatBtn) aiChatBtn.addEventListener('click', function() { showModal('aiChatModal'); });
+
+      var addTxBtn = document.getElementById('addTransactionBtn');
+      if (addTxBtn) addTxBtn.addEventListener('click', function() { openAddTransactionModal(); });
+
+      // Add transaction form submit
+      var addTxForm = document.getElementById('addTransactionForm');
+      if (addTxForm) {
+        addTxForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var dateValue = document.getElementById('transactionDate').value;
+          var formattedDate = dateValue ? dateValue + ' 00:00:00' : null;
+          var formData = {
+            transactionType: parseInt(document.getElementById('transactionType').value),
+            amount: parseFloat(document.getElementById('amount').value),
+            merchantName: document.getElementById('merchantName').value || null,
+            categoryId: parseInt(document.getElementById('categoryId').value) || null,
+            accountId: parseInt(document.getElementById('accountId').value) || null,
+            transactionDate: formattedDate,
+            description: document.getElementById('description').value || null
+          };
+          closeAddTransactionModal();
+          apiPost('/transactions', formData).then(function() {
+            // Reload bookkeeping data
+            apiGet('/transactions/summary').then(function(data) {
+              renderBookkeeping(data);
+            });
+          }).catch(function(err) { console.error('创建交易失败', err); });
+        });
+      }
+
+      // Goal form submit
+      var addGoalForm = document.getElementById('addGoalForm');
+      if (addGoalForm) {
+        addGoalForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var goalTypeVal = document.getElementById('goalType').value;
+          if (!goalTypeVal) {
+            alert('请选择目标类型');
+            return;
+          }
+          var formData = {
+            goalName: document.getElementById('goalName').value,
+            goalType: parseInt(goalTypeVal),
+            targetAmount: parseFloat(document.getElementById('targetAmount').value),
+            targetDate: document.getElementById('targetDate').value,
+            currentAmount: parseFloat(document.getElementById('currentAmount').value) || 0
+          };
+          closeAddGoalModal();
+          apiPost('/goals', formData).then(function() {
+            apiGet('/goals').then(function(data) {
+              renderGoals(data);
+            });
+          }).catch(function(err) { console.error('创建目标失败', err); alert('创建目标失败，请检查日期是否填写正确（必须是将来的日期）'); });
+        });
+      }
+
+      // Goals modal handlers
+      window.openAddGoalModal = function() {
+        showModal('addGoalModal');
+        // Set min date to tomorrow (today + 1 day)
+        var targetDateInput = document.getElementById('targetDate');
+        if (targetDateInput) {
+          var tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          targetDateInput.min = tomorrow.toISOString().split('T')[0];
+          targetDateInput.value = '';
+        }
+      };
+      window.closeAddGoalModal = function() { hideModal('addGoalModal'); };
+      window.closeGoalDetailModal = function() { hideModal('goalDetailModal'); };
+      window.closeEditGoalModal = function() { hideModal('editGoalModal'); };
+      window.setTodayDate = function() {
+        var d = document.getElementById('targetDate');
+        if (d) d.value = new Date().toISOString().split('T')[0];
+      };
+      window.deleteGoal = function(id) {
+        if (!confirm('确定删除此目标？')) return;
+        apiPost('/goals/' + id, {}).then(function() { loadPage('goals.html'); }).catch(function(e) { alert('删除失败'); });
+      };
+      window.openEditGoalModal = function(id) {
+        apiGet('/goals/' + id).then(function(goal) {
+          document.getElementById('editGoalId').value = goal.id;
+          document.getElementById('editGoalName').value = goal.goalName;
+          document.getElementById('editTargetAmount').value = goal.targetAmount;
+          document.getElementById('editTargetDate').value = goal.targetDate;
+          showModal('editGoalModal');
+        });
+      };
+
+      // Edit goal form submit
+      var editGoalForm = document.getElementById('editGoalForm');
+      if (editGoalForm) {
+        editGoalForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var formData = {
+            id: parseInt(document.getElementById('editGoalId').value),
+            goalName: document.getElementById('editGoalName').value,
+            targetAmount: parseFloat(document.getElementById('editTargetAmount').value),
+            targetDate: document.getElementById('editTargetDate').value
+          };
+          hideModal('editGoalModal');
+          apiPut('/goals/' + formData.id, formData).then(function() {
+            apiGet('/goals').then(function(data) {
+              renderGoals(data);
+            });
+          }).catch(function(err) { console.error('更新目标失败', err); });
+        });
+      }
+
+      // Bookkeeping modal
+      window.closeAddTransactionModal = function() { hideModal('addTransactionModal'); };
+      window.openAddTransactionModal = function() {
+        showModal('addTransactionModal');
+        // Populate account dropdown
+        var accountSelect = document.getElementById('accountId');
+        if (accountSelect) accountSelect.innerHTML = '';
+        apiGet('/accounts').then(function(data) {
+          var select = document.getElementById('accountId');
+          if (!select) return;
+          select.innerHTML = '';
+          (data.records || []).forEach(function(acc) {
+            var opt = document.createElement('option');
+            opt.value = acc.id;
+            opt.textContent = acc.bankName || acc.accountName || '账户';
+            select.appendChild(opt);
+          });
+        }).catch(function() {});
+        // Populate category dropdown (hardcoded)
+        var categorySelect = document.getElementById('categoryId');
+        if (categorySelect) categorySelect.innerHTML = '';
+        var cats = [
+          {id:1,name:'工资'},{id:2,name:'奖金'},{id:3,name:'投资收入'},{id:4,name:'副业'},{id:5,name:'理财收益'},
+          {id:10,name:'餐饮'},{id:11,name:'早午晚餐'},{id:12,name:'外卖'},{id:13,name:'下午茶'},
+          {id:20,name:'居住'},{id:21,name:'房租/房贷'},{id:22,name:'水电气'},{id:23,name:'物业费'},
+          {id:30,name:'交通'},{id:31,name:'公共交通'},{id:32,name:'打车'},{id:33,name:'私家车'},
+          {id:40,name:'购物'},{id:50,name:'医疗'},{id:60,name:'教育'},{id:70,name:'娱乐'},
+          {id:80,name:'旅游'},{id:90,name:'社交'},{id:100,name:'投资'}
+        ];
+        cats.forEach(function(cat) {
+          if (!categorySelect) return;
+          var opt = document.createElement('option');
+          opt.value = cat.id;
+          opt.textContent = cat.name;
+          categorySelect.appendChild(opt);
+        });
+      };
+
+      // Account modal
+      window.closeAddAccountModal = function() { hideModal('addAccountModal'); };
+      window.openAddAccountModal = function() { showModal('addAccountModal'); };
+
+      // AI chat modal
+      window.closeAIChat = function() { hideModal('aiChatModal'); };
+      window.openAIChat = function() { showModal('aiChatModal'); };
+
+      // Show date filter modal
+      function showDateFilterModal() {
+        var modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+        modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-sm mx-4"><h3 class="font-headline-md text-lg mb-4">选择日期范围</h3><div class="space-y-3"><button data-preset="today" class="preset-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">今天</button><button data-preset="yesterday" class="preset-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">昨天</button><button data-preset="thisWeek" class="preset-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">本周</button><button data-preset="thisMonth" class="preset-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">本月</button><button data-preset="lastMonth" class="preset-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">上月</button></div><button class="close-modal-btn mt-4 w-full py-3 bg-surface-container rounded-xl">关闭</button></div>';
+        document.body.appendChild(modal);
+        modal.querySelectorAll('.preset-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() { filterByDatePreset(btn.getAttribute('data-preset')); });
+        });
+        modal.querySelector('.close-modal-btn').addEventListener('click', function() { modal.remove(); });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+      }
+
+      // Show category filter modal
+      function showCategoryFilterModal() {
+        var modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+        modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-sm mx-4 max-h-[80vh] overflow-y-auto"><h3 class="font-headline-md text-lg mb-4">选择分类</h3><div class="space-y-2"><button data-cat="null" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors font-medium">全部</button><button data-cat="1" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">工资</button><button data-cat="2" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">奖金</button><button data-cat="3" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">投资收入</button><button data-cat="4" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">副业</button><button data-cat="10" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">餐饮</button><button data-cat="11" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">早午晚餐</button><button data-cat="12" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">外卖</button><button data-cat="20" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">居住</button><button data-cat="30" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">交通</button><button data-cat="40" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">购物</button><button data-cat="50" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">医疗</button><button data-cat="60" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">教育</button><button data-cat="70" class="cat-btn w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container transition-colors">娱乐</button></div><button class="close-modal-btn mt-4 w-full py-3 bg-surface-container rounded-xl">关闭</button></div>';
+        document.body.appendChild(modal);
+        modal.querySelectorAll('.cat-btn').forEach(function(btn) {
+          var catVal = btn.getAttribute('data-cat');
+          btn.addEventListener('click', function() { filterByCategory(catVal === 'null' ? null : parseInt(catVal)); });
+        });
+        modal.querySelector('.close-modal-btn').addEventListener('click', function() { modal.remove(); });
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+      }
+
+      // Filter by date preset
+      function filterByDatePreset(preset) {
+        var today = new Date();
+        var y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+        var dayOfWeek = today.getDay();
+        var start, end;
+        var dateStr = function(year, month, day) {
+          return year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+        };
+        if (preset === 'today') {
+          start = end = dateStr(y, m, d);
+        } else if (preset === 'yesterday') {
+          var yesterday = new Date(y, m, d-1);
+          start = end = dateStr(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+        } else if (preset === 'thisWeek') {
+          var sunday = new Date(y, m, d - dayOfWeek);
+          start = dateStr(sunday.getFullYear(), sunday.getMonth(), sunday.getDate());
+          end = dateStr(y, m, d);
+        } else if (preset === 'thisMonth') {
+          start = dateStr(y, m, 1);
+          end = dateStr(y, m, d);
+        } else if (preset === 'lastMonth') {
+          var lm = new Date(y, m-1, 1);
+          var daysInLM = new Date(lm.getFullYear(), lm.getMonth()+1, 0).getDate();
+          start = dateStr(lm.getFullYear(), lm.getMonth(), 1);
+          end = dateStr(lm.getFullYear(), lm.getMonth(), daysInLM);
+        }
+        _bkStartDate = start;
+        _bkEndDate = end;
+        // Remove only filter modals (z-50), not sidebar or FAB
+        document.querySelectorAll('.fixed.z-50').forEach(function(el) { el.remove(); });
+        applyBkFilters();
+      }
+
+      // Filter by category
+      function filterByCategory(catId) {
+        _bkCategoryId = catId;
+        // Remove only filter modals (z-50), not sidebar or FAB
+        document.querySelectorAll('.fixed.z-50').forEach(function(el) { el.remove(); });
+        applyBkFilters();
+      }
+
+      // Apply bookkeeping filters
+    function applyBkFilters() {
+      var txList = document.getElementById('transaction-list');
+      if (!txList || !_bkOrigData) return;
+      if (_bkOrigData.length === 0) { txList.innerHTML = '<div class="text-center py-12 text-on-surface-variant">暂无交易记录</div>'; return; }
+      var filtered = JSON.parse(JSON.stringify(_bkOrigData));
+      // date filter
+      if (_bkStartDate && _bkEndDate) {
+        filtered = filtered.map(function(d) {
+          var filteredTx = d.transactions.filter(function(t) {
+            var dStr = t.transactionDate ? t.transactionDate.split(' ')[0] : '';
+            return dStr >= _bkStartDate && dStr <= _bkEndDate;
+          });
+          return { dateTitle: d.dateTitle, transactions: filteredTx };
+        }).filter(function(d) { return d.transactions.length > 0; });
+      }
+      // category filter
+      if (_bkCategoryId !== null) {
+        var catNames = {1:'工资',2:'奖金',3:'投资收入',4:'副业',5:'理财收益',10:'餐饮',11:'早午晚餐',12:'外卖',13:'下午茶',20:'居住',21:'房租/房贷',22:'水电气',23:'物业费',30:'交通',31:'公共交通',32:'打车',33:'私家车',40:'购物',50:'医疗',60:'教育',70:'娱乐',80:'旅游',90:'社交',100:'投资'};
+        var catName = catNames[_bkCategoryId] || '';
+        filtered = filtered.map(function(d) {
+          var filteredTx = d.transactions.filter(function(t) { return t.categoryId === _bkCategoryId || (catName && t.categoryName === catName); });
+          return { dateTitle: d.dateTitle, transactions: filteredTx };
+        }).filter(function(d) { return d.transactions.length > 0; });
+      }
+      // search filter
+      if (_bkSearchText) {
+        var txt = _bkSearchText.toLowerCase();
+        filtered = filtered.map(function(d) {
+          var filteredTx = d.transactions.filter(function(t) {
+            return (t.merchantName||'').toLowerCase().includes(txt) || (t.description||'').toLowerCase().includes(txt) || (t.categoryName||'').toLowerCase().includes(txt) || (t.accountName||'').toLowerCase().includes(txt);
+          });
+          return { dateTitle: d.dateTitle, transactions: filteredTx };
+        }).filter(function(d) { return d.transactions.length > 0; });
+      }
+      txList.innerHTML = '';
+      if (filtered.length === 0 || filtered.every(function(d) { return d.transactions.length === 0; })) {
+        txList.innerHTML = '<div class="text-center py-12 text-on-surface-variant">没有匹配的交易记录</div>';
+        return;
+      }
+      filtered.forEach(function(daily) {
+        daily.transactions.forEach(function(tx) {
+          var typeColor = tx.transactionType === 1 ? 'text-tertiary' : 'text-error';
+          var typeIcon = tx.transactionType === 1 ? 'arrow_downward' : 'arrow_upward';
+          var item = document.createElement('div');
+          item.className = 'flex items-center gap-4 p-4 bg-white rounded-2xl';
+          item.innerHTML = '<div class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center ' + typeColor + '"><span class="material-symbols-outlined">' + typeIcon + '</span></div><div class="flex-1"><p class="font-body-md font-bold">' + (tx.categoryName || tx.merchantName || '未知') + '</p><p class="text-on-surface-variant font-label-sm">' + (tx.description || '') + '</p></div><div class="text-right"><p class="font-body-md font-bold ' + typeColor + '">' + (tx.transactionType === 1 ? '+' : '-') + formatCurrency(tx.amount) + '</p></div>';
+          txList.appendChild(item);
+        });
+      });
+    }
+
+    // Search input handler for bookkeeping
+    var searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        _bkSearchText = e.target.value.toLowerCase().trim();
+        applyBkFilters();
+      });
+    }
+
+    // Date and category filter buttons
+    var dateBtn = document.getElementById('filter-date-btn');
+    if (dateBtn) dateBtn.addEventListener('click', function() { showDateFilterModal(); });
+    var catBtn = document.getElementById('filter-category-btn');
+    if (catBtn) catBtn.addEventListener('click', function() { showCategoryFilterModal(); });
+
+    // AI chat
+    window.sendChatMessage = function() {
+        var input = document.getElementById('chatInput');
+        var msg = input ? input.value.trim() : '';
+        if (!msg) return;
+        var messages = document.getElementById('chatMessages');
+        if (messages) {
+          var userMsg = document.createElement('div');
+          userMsg.className = 'flex justify-end';
+          userMsg.innerHTML = '<div class="bg-primary text-white px-4 py-2 rounded-2xl max-w-[70%]">' + msg + '</div>';
+          messages.appendChild(userMsg);
+          input.value = '';
+        }
+        apiPost('/ai/chat', {message: msg}).then(function(resp) {
+          var aiMsg = document.createElement('div');
+          aiMsg.className = 'flex justify-start';
+          aiMsg.innerHTML = '<div class="bg-surface-container px-4 py-2 rounded-2xl max-w-[70%]">' + resp + '</div>';
+          messages.appendChild(aiMsg);
+          messages.scrollTop = messages.scrollHeight;
+        }).catch(function() {
+          var errMsg = document.createElement('div');
+          errMsg.className = 'flex justify-start';
+          errMsg.innerHTML = '<div class="bg-error-container text-on-error-container px-4 py-2 rounded-2xl">抱歉，AI服务暂时不可用</div>';
+          messages.appendChild(errMsg);
+        });
+      };
+      window.sendQuickMessage = function(msg) {
+        var input = document.getElementById('chatInput');
+        if (input) input.value = msg;
+        sendChatMessage();
+      };
+
+      // Home page buttons
+      document.querySelectorAll('#content-area button').forEach(function(btn) {
+        var txt = btn.textContent.trim();
+        if (txt === '调整') {
+          btn.addEventListener('click', function() { window.top.location.hash = 'bookkeeping.html'; });
+        }
+        if (txt === '查看日历') {
+          btn.addEventListener('click', function() { window.top.location.hash = 'bookkeeping.html'; });
+        }
+        if (txt === '添加第一笔交易') {
+          btn.addEventListener('click', function() { openAddTransactionModal(); });
+        }
+      });
+
+      // Account page buttons
+      var depositBtn = document.getElementById('depositBtn');
+      if (depositBtn) depositBtn.addEventListener('click', function() { window.top.location.hash = 'bookkeeping.html'; });
+      var analyzeBtn = document.getElementById('analyzeBtn');
+      if (analyzeBtn) analyzeBtn.addEventListener('click', function() { window.top.location.hash = 'analysis.html'; });
+
+      // Account card click handlers - show detail modals
+      var bankCard = document.getElementById('bank-card');
+      if (bankCard) {
+        bankCard.style.cursor = 'pointer';
+        bankCard.addEventListener('click', function() {
+          var data = window._accountsData;
+          if (!data || !data.bankCardSummary) return;
+          var bs = data.bankCardSummary;
+          var modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+          modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-md mx-4"><div class="flex justify-between items-center mb-6"><h3 class="font-headline-md text-lg">银行卡详情</h3><button class="close-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer"><span class="material-symbols-outlined">close</span></button></div><div class="space-y-4"><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">活跃账户</span><span class="font-bold text-on-surface">' + (bs.count || 0) + ' 个</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">总余额</span><span class="font-bold text-primary">' + formatCurrency(bs.balance) + '</span></div></div></div>';
+          document.body.appendChild(modal);
+          modal.querySelector('.close-btn').addEventListener('click', function() { modal.remove(); });
+          modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        });
+      }
+
+      var investmentCard = document.getElementById('investment-card');
+      if (investmentCard) {
+        investmentCard.style.cursor = 'pointer';
+        investmentCard.addEventListener('click', function() {
+          var data = window._accountsData;
+          if (!data || !data.investmentSummary) return;
+          var inv = data.investmentSummary;
+          var modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+          modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-md mx-4"><div class="flex justify-between items-center mb-6"><h3 class="font-headline-md text-lg">投资详情</h3><button class="close-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer"><span class="material-symbols-outlined">close</span></button></div><div class="space-y-4"><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">总市值</span><span class="font-bold text-primary">' + formatCurrency(inv.balance) + '</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">占总资产比例</span><span class="font-bold text-tertiary">+' + formatPercent(inv.percentage) + '</span></div><div class="h-3 w-full bg-surface-variant rounded-full overflow-hidden mt-2"><div class="h-full bg-tertiary rounded-full" style="width:' + Math.min(inv.percentage || 0, 100) + '%"></div></div></div></div>';
+          document.body.appendChild(modal);
+          modal.querySelector('.close-btn').addEventListener('click', function() { modal.remove(); });
+          modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        });
+      }
+
+      var ssCard = document.getElementById('social-security-card');
+      if (ssCard) {
+        ssCard.style.cursor = 'pointer';
+        ssCard.addEventListener('click', function() {
+          var data = window._accountsData;
+          if (!data || !data.socialSecuritySummary) return;
+          var ss = data.socialSecuritySummary;
+          var modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+          modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-md mx-4"><div class="flex justify-between items-center mb-6"><h3 class="font-headline-md text-lg">社保公积金详情</h3><button class="close-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer"><span class="material-symbols-outlined">close</span></button></div><div class="space-y-4"><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">账户余额</span><span class="font-bold text-primary">' + formatCurrency(ss.balance) + '</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">最近缴存</span><span class="font-bold text-on-surface">' + (ss.lastPaymentDate || '暂无记录') + '</span></div></div></div>';
+          document.body.appendChild(modal);
+          modal.querySelector('.close-btn').addEventListener('click', function() { modal.remove(); });
+          modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        });
+      }
+
+      var liabilityCard = document.getElementById('liability-card');
+      if (liabilityCard) {
+        liabilityCard.style.cursor = 'pointer';
+        liabilityCard.addEventListener('click', function() {
+          var data = window._accountsData;
+          if (!data || !data.liabilitySummary) return;
+          var liab = data.liabilitySummary;
+          var modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+          modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-md mx-4"><div class="flex justify-between items-center mb-6"><h3 class="font-headline-md text-lg">负债详情</h3><button class="close-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer"><span class="material-symbols-outlined">close</span></button></div><div class="space-y-4"><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">负债总额</span><span class="font-bold text-error">-' + formatCurrency(liab.totalAmount) + '</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">占总资产比例</span><span class="font-bold text-error">' + formatPercent(liab.percentage) + '</span></div><div class="h-3 w-full bg-surface-variant rounded-full overflow-hidden mt-2"><div class="h-full bg-error rounded-full" style="width:' + Math.min(liab.percentage || 0, 100) + '%"></div></div></div></div>';
+          document.body.appendChild(modal);
+          modal.querySelector('.close-btn').addEventListener('click', function() { modal.remove(); });
+          modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        });
+      }
+
+      var fixedAssetCard = document.getElementById('fixed-asset-card');
+      if (fixedAssetCard) {
+        fixedAssetCard.style.cursor = 'pointer';
+        fixedAssetCard.addEventListener('click', function() {
+          var data = window._accountsData;
+          if (!data || !data.fixedAssetSummary) return;
+          var fa = data.fixedAssetSummary;
+          var modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+          modal.innerHTML = '<div class="bg-surface-container-lowest rounded-3xl p-6 w-full max-w-md mx-4"><div class="flex justify-between items-center mb-6"><h3 class="font-headline-md text-lg">固定资产详情</h3><button class="close-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer"><span class="material-symbols-outlined">close</span></button></div><div class="space-y-4"><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">资产总额</span><span class="font-bold text-primary">' + formatCurrency(fa.totalAmount) + '</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">房产</span><span class="font-bold text-on-surface">' + (fa.propertyCount || 0) + ' 处</span></div><div class="flex justify-between items-center p-4 bg-white rounded-xl"><span class="text-on-surface-variant">汽车</span><span class="font-bold text-on-surface">' + (fa.vehicleCount || 0) + ' 辆</span></div></div></div>';
+          document.body.appendChild(modal);
+          modal.querySelector('.close-btn').addEventListener('click', function() { modal.remove(); });
+          modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        });
+      }
+
+      // Attach inline onclick="this.closest('.fixed').remove()"
+      document.querySelectorAll('[onclick*="this.closest"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var m = btn.closest('.fixed');
+          if (m) m.classList.add('hidden');
+        });
+      });
+    }
+
+    async function loadPage(pageName) {
+      showSkeleton();
+      try {
+        // Step 1: Load HTML template
+        var response = await fetch('pages/' + pageName);
+        var html = await response.text();
+        var temp = document.createElement('div');
+        temp.innerHTML = html;
+
+        // Get main content and remove iframes/scripts
+        var mainContent = temp.querySelector('main');
+        if (mainContent) {
+          var iframes = mainContent.querySelectorAll('iframe');
+          iframes.forEach(function(iframe) { iframe.remove(); });
+          var scripts = mainContent.querySelectorAll('script');
+          scripts.forEach(function(s) { s.remove(); });
+        }
+
+        // Collect content AFTER </main> (floating buttons, modals, etc.)
+        var afterMain = '';
+        var allContent = temp.innerHTML;
+        var mainCloseIndex = allContent.indexOf('</main>');
+        if (mainCloseIndex !== -1) {
+          afterMain = allContent.substring(mainCloseIndex + 7).replace(/<\/body>|<\/html>/gi, '');
+        }
+
+        // Inject content
+        document.getElementById('content-area').innerHTML = (mainContent ? mainContent.innerHTML : '') + afterMain;
+
+        // Step 2: Re-attach button handlers (after content injection, before renderer)
+        attachButtonHandlers();
+
+        // Step 3: Call renderer to fetch data and populate DOM
+        var renderer = pageRenderers[pageName];
+        if (renderer) {
+          await renderer();
+        }
+        history.pushState({ page: pageName }, '', '#' + pageName);
+        // Only set hash if not already correctly set (prevents double-load on init)
+        var currentHash = window.top.location.hash;
+        var expectedHash = '#' + pageName;
+        if (currentHash !== expectedHash) {
+          window.top.location.hash = pageName;
+        } else {
+          // Hash is already correct, but still need history state
+          history.pushState({ page: pageName }, '', expectedHash);
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+        if (error.message === 'NOT_AUTHENTICATED' || error.message.indexOf('401') !== -1) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          document.getElementById('content-area').innerHTML = '<div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-6"><div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6"><span class="material-symbols-outlined text-[40px] text-primary">account_circle</span></div><h2 class="font-headline-md text-headline-md text-on-surface mb-2">登录已过期</h2><p class="text-on-surface-variant mb-6">请重新登录</p><a href="pages/auth/login.html" class="px-8 py-3 bg-primary text-on-primary rounded-full font-headline-md hover:shadow-lg transition-all">前往登录</a></div>';
+        } else {
+          showError('加载失败: ' + error.message);
+        }
+      }
+    }
+
+    // ========== Router ==========
+    window.addEventListener('hashchange', function() {
+      var page = window.location.hash.replace('#', '') || 'home.html';
+      loadPage(page);
+    });
+
+    window.addEventListener('popstate', function(e) {
+      if (e.state && e.state.page) loadPage(e.state.page);
+    });
+
+    // Initial load
+    loadPage('home.html');
+  </script>
+</body>
+
+</html>

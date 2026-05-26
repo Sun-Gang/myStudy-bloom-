@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bloomfinance.notification.repository.NotificationPrefsRepository">
+
+    <select id="findByUserId" resultType="com.bloomfinance.notification.domain.entity.NotificationPrefsEntity">
+        SELECT * FROM t_notification_prefs
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.bloomfinance.notification.domain.entity.NotificationPrefsEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_notification_prefs (user_id, bill_due_enabled, overdue_warning_enabled, large_tx_enabled, goal_deviation_enabled, quiet_hours_start, quiet_hours_end, created_at, updated_at)
+        VALUES (#{userId}, #{billDueEnabled}, #{overdueWarningEnabled}, #{largeTxEnabled}, #{goalDeviationEnabled}, #{quietHoursStart}, #{quietHoursEnd}, NOW(), NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.bloomfinance.notification.domain.entity.NotificationPrefsEntity">
+        UPDATE t_notification_prefs
+        SET bill_due_enabled = #{billDueEnabled},
+            overdue_warning_enabled = #{overdueWarningEnabled},
+            large_tx_enabled = #{largeTxEnabled},
+            goal_deviation_enabled = #{goalDeviationEnabled},
+            quiet_hours_start = #{quietHoursStart},
+            quiet_hours_end = #{quietHoursEnd},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

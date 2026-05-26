@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: bloom-finance
+
+  profiles:
+    active: dev
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 开发环境默认关闭文档，生产环境按需开启
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# 动态配置开启
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env
+
+# 通用错误页面
+error:
+  whitelabel:
+    enabled: false

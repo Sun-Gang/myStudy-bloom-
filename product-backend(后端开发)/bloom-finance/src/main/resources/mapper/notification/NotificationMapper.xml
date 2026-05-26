@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bloomfinance.notification.repository.NotificationRepository">
+
+    <select id="findByIdAndUserId" resultType="com.bloomfinance.notification.domain.entity.NotificationEntity">
+        SELECT * FROM t_notification
+        WHERE id = #{id} AND user_id = #{userId} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="findByUserId" resultType="com.bloomfinance.notification.domain.entity.NotificationEntity">
+        SELECT * FROM t_notification
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY sent_at DESC
+    </select>
+
+    <select id="countUnread" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM t_notification
+        WHERE user_id = #{userId} AND status = 1 AND deleted = 0
+    </select>
+
+</mapper>

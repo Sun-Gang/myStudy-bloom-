@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Bloom 财务 - 控制台</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#ead5dc", "inverse-on-surface": "#ffecf2",
+            "secondary-container": "#e7e1ae", "primary-container": "#ffb7c5",
+            "tertiary-fixed-dim": "#96d5a0", "on-tertiary": "#ffffff",
+            "inverse-surface": "#3a2d32", "on-tertiary-container": "#256036",
+            "on-secondary-fixed-variant": "#4b4822", "outline-variant": "#d6c2c4",
+            "error-container": "#ffdad6", "secondary": "#636037",
+            "on-secondary-fixed": "#1e1c00", "surface-container-low": "#fff0f4",
+            "surface-container-highest": "#f2dde4", "surface-container-high": "#f8e3ea",
+            "on-surface": "#24181d", "secondary-fixed": "#eae4b1",
+            "on-error-container": "#93000a", "on-tertiary-fixed": "#00210b",
+            "primary-fixed-dim": "#fbb3c1", "on-primary": "#ffffff",
+            "background": "#fff8f8", "surface-container": "#fee8f0",
+            "primary-fixed": "#ffd9df", "surface-tint": "#864e5a",
+            "surface": "#fff8f8", "error": "#ba1a1a",
+            "tertiary-fixed": "#b2f2bb", "on-background": "#24181d",
+            "on-secondary-container": "#67643b", "surface-container-lowest": "#ffffff",
+            "on-primary-container": "#7b4551", "on-error": "#ffffff",
+            "tertiary": "#2f6a3f", "on-primary-fixed": "#360c19",
+            "outline": "#837375", "surface-bright": "#fff8f8",
+            "primary": "#864e5a", "surface-variant": "#f2dde4",
+            "on-secondary": "#ffffff", "on-surface-variant": "#514345",
+            "inverse-primary": "#fbb3c1", "on-primary-fixed-variant": "#6b3743",
+            "secondary-fixed-dim": "#cdc897", "tertiary-container": "#9ad9a4",
+            "on-tertiary-fixed-variant": "#145129"
+          },
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+          "spacing": { "base": "8px", "element-gap": "16px", "section-gap": "40px", "container-padding": "24px", "gutter": "16px" },
+          "fontFamily": { "body-lg": ["Be Vietnam Pro"], "body-md": ["Be Vietnam Pro"], "display-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "label-sm": ["Be Vietnam Pro"] },
+          "fontSize": { "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }] }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #fff8f8; font-family: 'Be Vietnam Pro', sans-serif; }
+    .soft-glow { box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4); }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .bg-cherry-gradient { background: linear-gradient(135deg, #fff8f8 0%, #fee8f0 100%); }
+    iframe { display: block; }
+    .chart-bar { transition: height 0.5s ease; }
+    .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-md antialiased">
+  <!-- Sidebar Navigation (iframe) -->
+  <iframe id="sidebar-iframe" src="../components/sidebar.html" class="fixed left-0 top-0 h-screen w-[288px] z-40" frameborder="0" scrolling="no"></iframe>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-[288px] min-h-screen bg-cherry-gradient pb-32 md:pb-container-padding">
+    <!-- Header (iframe) -->
+    <iframe id="header-iframe" src="../components/header.html?v=7" class="sticky top-0 z-40 w-full h-[72px]" frameborder="0" scrolling="no"></iframe>
+
+    <!-- Bento Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter p-6">
+      <!-- Total Net Worth Card -->
+      <div class="lg:col-span-8 bg-white p-8 rounded-[40px] soft-glow flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden">
+        <div class="relative z-10">
+          <span class="text-on-surface-variant font-label-sm uppercase tracking-widest">总净资产</span>
+          <h3 id="totalNetWorth" class="font-display-lg text-[48px] text-primary mt-2">¥0.00</h3>
+          <div class="flex gap-4 mt-6">
+            <div id="growthBadge" class="flex items-center gap-2 bg-tertiary-container/30 px-4 py-2 rounded-full text-on-tertiary-container">
+              <span class="material-symbols-outlined text-[18px]">trending_up</span>
+              <span id="growthRate" class="font-label-sm">本月增长 0%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Mini Chart -->
+        <div id="miniChart" class="w-full md:w-64 h-40 bg-surface-container rounded-[32px] flex items-end justify-between p-6 gap-2">
+          <div class="w-full bg-primary-container rounded-full h-[40%] chart-bar" data-height="40"></div>
+          <div class="w-full bg-primary-container rounded-full h-[60%] chart-bar" data-height="60"></div>
+          <div class="w-full bg-primary-container rounded-full h-[50%] chart-bar" data-height="50"></div>
+          <div class="w-full bg-primary rounded-full h-[90%] chart-bar" data-height="90"></div>
+        </div>
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary-container/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <!-- Health Score Card -->
+      <div class="lg:col-span-4 bg-primary text-on-primary p-8 rounded-[40px] soft-glow flex flex-col items-center text-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+          <svg class="w-full h-full" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-dasharray="2 2" stroke-width="0.5"></circle>
+            <circle cx="50" cy="50" fill="none" r="30" stroke="currentColor" stroke-dasharray="2 2" stroke-width="0.5"></circle>
+          </svg>
+        </div>
+        <span class="text-primary-fixed font-label-sm uppercase tracking-widest mb-4">财务健康分</span>
+        <div class="relative w-32 h-32 flex items-center justify-center">
+          <svg class="w-full h-full -rotate-90">
+            <circle id="healthCircleBg" cx="64" cy="64" fill="none" r="58" stroke="rgba(255,255,255,0.2)" stroke-width="12"></circle>
+            <circle id="healthCircle" cx="64" cy="64" fill="none" r="58" stroke="white" stroke-dasharray="364.4" stroke-linecap="round" stroke-width="12" stroke-dashoffset="54.6"></circle>
+          </svg>
+          <span id="healthScore" class="absolute font-display-lg text-display-lg">0</span>
+        </div>
+        <p id="healthDescription" class="mt-6 font-body-md text-primary-fixed">加载中...</p>
+      </div>
+
+      <!-- Income/Expense Summary -->
+      <div class="lg:col-span-6 grid grid-cols-2 gap-gutter">
+        <div class="bg-white p-6 rounded-[32px] soft-glow border-b-4 border-tertiary-container">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center text-on-tertiary-container">
+              <span class="material-symbols-outlined">arrow_downward</span>
+            </div>
+            <span class="font-headline-md text-on-surface">收入</span>
+          </div>
+          <span id="monthIncome" class="text-[28px] font-bold text-on-surface">¥0.00</span>
+          <p id="incomeCount" class="text-on-surface-variant font-label-sm mt-2">0 笔交易</p>
+        </div>
+        <div class="bg-white p-6 rounded-[32px] soft-glow border-b-4 border-error-container">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-error-container rounded-full flex items-center justify-center text-on-error-container">
+              <span class="material-symbols-outlined">arrow_upward</span>
+            </div>
+            <span class="font-headline-md text-on-surface">支出</span>
+          </div>
+          <span id="monthExpense" class="text-[28px] font-bold text-on-surface">¥0.00</span>
+          <p id="expenseCount" class="text-on-surface-variant font-label-sm mt-2">0 笔交易</p>
+        </div>
+      </div>
+
+      <!-- Budget Alert -->
+      <div id="budgetAlertContainer" class="lg:col-span-6 bg-secondary-container/50 p-6 rounded-[32px] soft-glow flex items-center justify-between border-2 border-secondary-container">
+        <div class="flex items-center gap-6">
+          <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[32px]">restaurant</span>
+          </div>
+          <div>
+            <h4 id="budgetCategoryName" class="font-headline-md text-on-secondary-container">餐饮预算</h4>
+            <div class="mt-2 w-48 h-2 bg-white/50 rounded-full overflow-hidden">
+              <div id="budgetProgressBar" class="h-full bg-secondary rounded-full" style="width: 0%"></div>
+            </div>
+            <p id="budgetDescription" class="text-on-secondary-container/70 font-label-sm mt-2">暂无预算数据</p>
+          </div>
+        </div>
+        <button class="bg-white text-secondary px-6 py-3 rounded-full font-label-sm soft-glow hover:bg-secondary hover:text-white transition-all">调整</button>
+      </div>
+
+      <!-- Bill Reminders -->
+      <div class="lg:col-span-12 bg-white p-8 rounded-[40px] soft-glow">
+        <div class="flex justify-between items-center mb-6">
+          <h4 class="font-headline-md text-on-surface">即将到来的账单</h4>
+          <button class="text-primary font-body-md hover:underline">查看日历</button>
+        </div>
+        <div id="billRemindersList" class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+          <!-- Bills will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation for Mobile -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl md:hidden flex justify-around items-center py-4 px-6 z-50 rounded-t-[32px] soft-glow">
+    <a class="flex flex-col items-center gap-1 text-primary" href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+      <span class="text-[10px] font-bold">首页</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">account_balance_wallet</span>
+      <span class="text-[10px] font-medium">钱包</span>
+    </a>
+    <div class="relative -top-8">
+      <button class="w-14 h-14 bg-primary text-on-primary rounded-full soft-glow flex items-center justify-center shadow-lg shadow-primary/40">
+        <span class="material-symbols-outlined">add</span>
+      </button>
+    </div>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="text-[10px] font-medium">洞察</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-medium">个人中心</span>
+    </a>
+  </nav>
+
+<script>
+const API_BASE = 'http://localhost:8080/api/v1';
+
+function formatCurrency(amount) {
+  if (amount === null || amount === undefined) return '¥0.00';
+  return '¥' + parseFloat(amount).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatPercent(value) {
+  if (value === null || value === undefined) return '0%';
+  return parseFloat(value).toFixed(1) + '%';
+}
+
+function getDaysText(days) {
+  if (days === 0) return '今天到期';
+  if (days === 1) return '明天到期';
+  if (days < 0) return Math.abs(days) + ' 天已逾期';
+  return days + ' 天后到期';
+}
+
+async function loadDashboard() {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    console.warn('未登录，跳转到登录页');
+    window.location.href = 'auth/login.html';
+    return;
+  }
+
+  try {
+    const response = await fetch(API_BASE + '/dashboard', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.status === 401) {
+      console.warn('Token过期，跳转登录');
+      window.location.href = 'auth/login.html';
+      return;
+    }
+
+    const result = await response.json();
+    if (result.code === 200) {
+      updateDashboard(result.data);
+    } else {
+      console.error('获取仪表盘数据失败:', result.message);
+    }
+  } catch (error) {
+    console.error('加载仪表盘数据失败:', error);
+  }
+}
+
+function updateDashboard(data) {
+  // 1. 总净资产
+  document.getElementById('totalNetWorth').textContent = formatCurrency(data.totalNetWorth);
+
+  // 2. 本月增长
+  const growthRate = formatPercent(data.monthGrowthRate);
+  document.getElementById('growthRate').textContent = '本月增长 ' + growthRate;
+
+  // 3. 财务健康分
+  const score = data.healthScore || 0;
+  document.getElementById('healthScore').textContent = score;
+  document.getElementById('healthDescription').textContent = data.healthDescription || '';
+
+  // 更新健康分圆环
+  const circumference = 2 * Math.PI * 58; // 约364.4
+  const offset = circumference * (1 - score / 100);
+  document.getElementById('healthCircle').style.strokeDashoffset = offset;
+
+  // 4. 收入支出
+  document.getElementById('monthIncome').textContent = formatCurrency(data.monthIncome);
+  document.getElementById('monthExpense').textContent = formatCurrency(data.monthExpense);
+  document.getElementById('incomeCount').textContent = (data.incomeCount || 0) + ' 笔交易';
+  document.getElementById('expenseCount').textContent = (data.expenseCount || 0) + ' 笔交易';
+
+  // 5. 预算提醒
+  if (data.budgetAlerts && data.budgetAlerts.length > 0) {
+    const budget = data.budgetAlerts[0];
+    document.getElementById('budgetCategoryName').textContent = budget.categoryName || '预算提醒';
+    document.getElementById('budgetProgressBar').style.width = Math.min(budget.usedPercent, 100) + '%';
+    document.getElementById('budgetDescription').textContent =
+      '已使用每月 ' + formatCurrency(budget.budgetAmount) + ' 限额的 ' + budget.usedPercent + '%';
+  }
+
+  // 6. 账单提醒
+  const billList = document.getElementById('billRemindersList');
+  billList.innerHTML = '';
+
+  if (data.billReminders && data.billReminders.length > 0) {
+    data.billReminders.forEach(bill => {
+      const icon = bill.icon || 'bolt';
+      const borderColor = bill.daysUntilDue <= 2 ? 'border-primary' :
+                         bill.daysUntilDue <= 5 ? 'border-tertiary-container' : 'border-secondary-container';
+
+      const billItem = document.createElement('div');
+      billItem.className = `flex items-center gap-4 p-4 rounded-[24px] bg-surface-container-low border-l-4 ${borderColor}`;
+      billItem.innerHTML = `
+        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined">${icon}</span>
+        </div>
+        <div>
+          <p class="font-body-md font-bold">${bill.billName}</p>
+          <p class="text-on-surface-variant font-label-sm">${getDaysText(bill.daysUntilDue)} • ${formatCurrency(bill.amount)}</p>
+        </div>
+      `;
+      billList.appendChild(billItem);
+    });
+  } else {
+    billList.innerHTML = '<p class="text-on-surface-variant col-span-3 text-center py-8">暂无待还账单</p>';
+  }
+
+  // 7. 更新迷你图表
+  if (data.netWorthTrend && data.netWorthTrend.length > 0) {
+    const bars = document.querySelectorAll('#miniChart .chart-bar');
+    const maxValue = Math.max(...data.netWorthTrend.map(t => parseFloat(t.netWorth) || 0));
+    const minValue = Math.min(...data.netWorthTrend.map(t => parseFloat(t.netWorth) || 0));
+    const range = maxValue - minValue || 1;
+
+    bars.forEach((bar, index) => {
+      if (data.netWorthTrend[index]) {
+        const value = parseFloat(data.netWorthTrend[index].netWorth) || 0;
+        const heightPercent = ((value - minValue) / range * 50) + 40; // 40-90%范围
+        bar.style.height = heightPercent + '%';
+      }
+    });
+  }
+}
+
+// 页面加载时获取数据
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>

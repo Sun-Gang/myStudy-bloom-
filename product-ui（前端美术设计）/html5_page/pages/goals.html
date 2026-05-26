@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Bloom 财务 - 目标</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#ead5dc",
+            "inverse-on-surface": "#ffecf2",
+            "secondary-container": "#e7e1ae",
+            "primary-container": "#ffb7c5",
+            "tertiary-fixed-dim": "#96d5a0",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#3a2d32",
+            "on-tertiary-container": "#256036",
+            "on-secondary-fixed-variant": "#4b4822",
+            "outline-variant": "#d6c2c4",
+            "error-container": "#ffdad6",
+            "secondary": "#636037",
+            "on-secondary-fixed": "#1e1c00",
+            "surface-container-low": "#fff0f4",
+            "surface-container-highest": "#f2dde4",
+            "surface-container-high": "#f8e3ea",
+            "on-surface": "#24181d",
+            "secondary-fixed": "#eae4b1",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#00210b",
+            "primary-fixed-dim": "#fbb3c1",
+            "on-primary": "#ffffff",
+            "background": "#fff8f8",
+            "surface-container": "#fee8f0",
+            "primary-fixed": "#ffd9df",
+            "surface-tint": "#864e5a",
+            "surface": "#fff8f8",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#b2f2bb",
+            "on-background": "#24181d",
+            "on-secondary-container": "#67643b",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-container": "#7b4551",
+            "on-error": "#ffffff",
+            "tertiary": "#2f6a3f",
+            "on-primary-fixed": "#360c19",
+            "outline": "#837375",
+            "surface-bright": "#fff8f8",
+            "primary": "#864e5a",
+            "surface-variant": "#f2dde4",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#514345",
+            "inverse-primary": "#fbb3c1",
+            "on-primary-fixed-variant": "#6b3743",
+            "secondary-fixed-dim": "#cdc897",
+            "tertiary-container": "#9ad9a4",
+            "on-tertiary-fixed-variant": "#145129"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "12px",
+            "2xl": "24px",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base": "8px",
+            "element-gap": "16px",
+            "section-gap": "40px",
+            "container-padding": "24px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "body-lg": ["Be Vietnam Pro"],
+            "body-md": ["Be Vietnam Pro"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Be Vietnam Pro"]
+          },
+          "fontSize": {
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #fff8f8;
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    .soft-glow {
+      box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    iframe {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="text-on-surface">
+  <!-- Sidebar Navigation (iframe) -->
+  <iframe id="sidebar-iframe" src="../components/sidebar.html" class="fixed left-0 top-0 h-screen w-[288px] z-40" frameborder="0" scrolling="no"></iframe>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-[288px] min-h-screen bg-background">
+    <!-- Header (iframe) -->
+    <iframe id="header-iframe" src="../components/header.html" class="sticky top-0 z-40 w-full h-[72px]" frameborder="0" scrolling="no"></iframe>
+
+    <!-- Goals Bento Grid -->
+    <section class="p-container-padding max-w-7xl mx-auto space-y-section-gap">
+      <!-- Summary Header -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 p-8 rounded-2xl bg-white soft-glow flex items-center gap-8 border border-white">
+          <div class="relative w-32 h-32 flex items-center justify-center goals-summary">
+            <svg class="w-full h-full -rotate-90">
+              <circle cx="64" cy="64" fill="none" r="56" stroke="#fee8f0" stroke-width="12"></circle>
+              <circle cx="64" cy="64" fill="none" r="56" stroke="#ffb7c5" stroke-dasharray="351.8"
+                stroke-dashoffset="105.5" stroke-linecap="round" stroke-width="12"></circle>
+            </svg>
+            <div class="absolute flex flex-col items-center">
+              <span class="font-display-lg text-primary text-2xl">0%</span>
+              <span class="font-label-sm text-on-surface-variant">进度</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline-md text-on-surface mb-2">太棒了! 目标达成率正在上升</h3>
+            <p class="font-body-md text-on-surface-variant max-w-md">本月您已成功为未来的梦想储蓄了 ¥4,200。保持这个节奏，您的首套房首付将提前3个月达成！</p>
+          </div>
+        </div>
+        <div class="p-8 rounded-2xl bg-tertiary-container/30 border border-white/50 flex flex-col justify-center items-center text-center">
+          <span class="material-symbols-outlined text-tertiary text-4xl mb-2" style="font-variation-settings: 'FILL' 1;">stars</span>
+          <h4 class="font-headline-md text-on-tertiary-container">理财达人</h4>
+          <p class="font-body-md text-on-tertiary-container">连续储蓄 120 天</p>
+        </div>
+      </div>
+
+      <!-- Goal Cards Grid -->
+      <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Primary Residence Card -->
+        <div class="bg-white rounded-2xl p-6 soft-glow border border-white flex flex-col group transition-transform hover:scale-[1.02]">
+          <div class="flex justify-between items-start mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-primary-container flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">home</span>
+            </div>
+            <div class="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">trending_up</span>
+              概率: 92%
+            </div>
+          </div>
+          <h4 class="font-headline-md text-on-surface mb-1">首套住房</h4>
+          <p class="font-body-md text-on-surface-variant mb-6">首套住房首付计划</p>
+          <div class="space-y-4 flex-1">
+            <div class="flex justify-between font-label-sm text-on-surface">
+              <span>¥450,000 / ¥1,200,000</span>
+              <span class="text-primary">37%</span>
+            </div>
+            <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary-container rounded-full" style="width: 37%"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-surface-variant/50">
+              <div>
+                <p class="font-label-sm text-on-surface-variant">每月储蓄</p>
+                <p class="font-headline-md text-primary text-lg">¥5,500</p>
+              </div>
+              <div>
+                <p class="font-label-sm text-on-surface-variant">剩余年限</p>
+                <p class="font-headline-md text-on-surface text-lg">4.2 年</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- College Fund Card -->
+        <div class="bg-white rounded-2xl p-6 soft-glow border border-white flex flex-col group transition-transform hover:scale-[1.02]">
+          <div class="flex justify-between items-start mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-secondary-container text-3xl" style="font-variation-settings: 'FILL' 1;">school</span>
+            </div>
+            <div class="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">equalizer</span>
+              概率: 85%
+            </div>
+          </div>
+          <h4 class="font-headline-md text-on-surface mb-1">子女教育基金</h4>
+          <p class="font-body-md text-on-surface-variant mb-6">孩子的未来教育基金</p>
+          <div class="space-y-4 flex-1">
+            <div class="flex justify-between font-label-sm text-on-surface">
+              <span>¥128,000 / ¥500,000</span>
+              <span class="text-primary">25%</span>
+            </div>
+            <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-secondary rounded-full" style="width: 25%; background-color: #636037"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-surface-variant/50">
+              <div>
+                <p class="font-label-sm text-on-surface-variant">每月储蓄</p>
+                <p class="font-headline-md text-primary text-lg">¥2,800</p>
+              </div>
+              <div>
+                <p class="font-label-sm text-on-surface-variant">剩余年限</p>
+                <p class="font-headline-md text-on-surface text-lg">12 年</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leisure Life Card -->
+        <div class="bg-white rounded-2xl p-6 soft-glow border border-white flex flex-col group transition-transform hover:scale-[1.02]">
+          <div class="flex justify-between items-start mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-tertiary-container flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-tertiary-container text-3xl" style="font-variation-settings: 'FILL' 1;">beach_access</span>
+            </div>
+            <div class="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">check_circle</span>
+              概率: 99%
+            </div>
+          </div>
+          <h4 class="font-headline-md text-on-surface mb-1">闲暇生活</h4>
+          <p class="font-body-md text-on-surface-variant mb-6">年度环球旅行储蓄</p>
+          <div class="space-y-4 flex-1">
+            <div class="flex justify-between font-label-sm text-on-surface">
+              <span>¥72,000 / ¥80,000</span>
+              <span class="text-primary">90%</span>
+            </div>
+            <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-tertiary rounded-full" style="width: 90%"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-surface-variant/50">
+              <div>
+                <p class="font-label-sm text-on-surface-variant">每月储蓄</p>
+                <p class="font-headline-md text-primary text-lg">¥1,500</p>
+              </div>
+              <div>
+                <p class="font-label-sm text-on-surface-variant">距离出发</p>
+                <p class="font-headline-md text-on-surface text-lg">5 个月</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add New Goal Card -->
+        <button class="rounded-2xl border-4 border-dashed border-primary-container p-6 flex flex-col items-center justify-center text-center gap-4 hover:bg-primary-container/10 transition-colors group min-h-[340px]">
+          <div class="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-on-primary-container text-5xl">add</span>
+          </div>
+          <div>
+            <h4 class="font-headline-md text-primary">添加新目标</h4>
+            <p class="font-body-md text-on-surface-variant">让下一个梦想起航</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Motivational Banner -->
+      <div class="relative w-full h-48 rounded-2xl overflow-hidden soft-glow">
+        <img class="w-full h-full object-cover opacity-60"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuApvjsXD0s1vbLvRbm5HJ2z35rTcL0BbELyhQtJvjsFjj7-QPH2cmwVIJHH97taZToQlalNv4GjkuS933xZau15AoQoo3RqKUEndvBpHeigKw43896ziCDrwT-QXCNBtfZcjyz4wGueqBclZvnRjkvQ_ROn-rUwS2vxtdKjgPfKfHvHv-q1sd0ZSqgPslBvxjsBU9p-FFWWSX_x_H81H3h6MWkYtByygraDY0M1HeZiTyGxyBSpuZIWK7zxDwUNSE6mUqwHAn4AryaI">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary-container/80 to-transparent flex flex-col justify-center px-12">
+          <h2 class="font-display-lg text-on-primary-container text-3xl mb-2">每一分钱都在开花</h2>
+          <p class="font-body-lg text-on-primary-container/80">Bloom Finance 陪伴您见证每一个财务目标的绽放。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Navigation Shell -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl md:hidden flex justify-around items-center py-4 px-4 z-50">
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">grid_view</span>
+      <span class="font-label-sm">首页</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-primary" href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">savings</span>
+      <span class="font-label-sm">目标</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">account_balance_wallet</span>
+      <span class="font-label-sm">钱包</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="font-label-sm">分析</span>
+    </a>
+  </nav>
+
+  <!-- Floating Action Button Contextual -->
+  <button id="addGoalBtn" class="group fixed right-8 bottom-24 md:bottom-8 w-16 h-16 rounded-full bg-primary text-on-primary shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-40 cursor-pointer">
+    <span class="material-symbols-outlined text-3xl">add_circle</span>
+    <span class="absolute right-20 bg-white text-primary px-4 py-2 rounded-xl whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity font-bold">添加目标</span>
+  </button>
+
+  <!-- Add Goal Modal -->
+  <div id="addGoalModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md mx-4 soft-glow max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface">添加新目标</h2>
+        <button onclick="closeAddGoalModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant">close</span>
+        </button>
+      </div>
+      <form id="addGoalForm" class="space-y-4">
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标名称</label>
+          <input id="goalName" type="text" placeholder="如：首套住房首付" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标类型</label>
+          <select id="goalType" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+            <option value="">请选择目标类型</option>
+            <option value="1">购房</option>
+            <option value="2">教育</option>
+            <option value="3">养老</option>
+            <option value="4">旅游</option>
+            <option value="5">购车</option>
+            <option value="6">通用</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标金额</label>
+          <input id="targetAmount" type="number" step="0.01" placeholder="0.00" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标日期</label>
+          <input id="targetDate" type="date" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">当前已存金额（可选）</label>
+          <input id="currentAmount" type="number" step="0.01" placeholder="0.00" value="0" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+        </div>
+        <div class="flex gap-4 pt-4">
+          <button type="button" onclick="closeAddGoalModal()" class="flex-1 h-12 bg-surface-container text-on-surface rounded-xl font-headline-md cursor-pointer">取消</button>
+          <button type="submit" class="flex-1 h-12 bg-primary text-white rounded-xl font-headline-md cursor-pointer">确定</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Goal Detail Modal -->
+  <div id="goalDetailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md mx-4 soft-glow max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="detailGoalName" class="font-headline-md text-headline-md text-on-surface">目标详情</h2>
+        <button onclick="closeGoalDetailModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant">close</span>
+        </button>
+      </div>
+      <div id="goalDetailContent" class="space-y-4">
+        <!-- Dynamic content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Goal Modal -->
+  <div id="editGoalModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md mx-4 soft-glow max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface">编辑目标</h2>
+        <button onclick="closeEditGoalModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant">close</span>
+        </button>
+      </div>
+      <form id="editGoalForm" class="space-y-4">
+        <input type="hidden" id="editGoalId">
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标名称</label>
+          <input id="editGoalName" type="text" placeholder="如：首套住房首付" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标金额</label>
+          <input id="editTargetAmount" type="number" step="0.01" placeholder="0.00" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div>
+          <label class="block font-label-sm text-on-surface-variant mb-2">目标日期</label>
+          <input id="editTargetDate" type="date" class="w-full h-12 px-4 bg-surface-container rounded-xl border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" required>
+        </div>
+        <div class="flex gap-4 pt-4">
+          <button type="button" onclick="closeEditGoalModal()" class="flex-1 h-12 bg-surface-container text-on-surface rounded-xl font-headline-md cursor-pointer">取消</button>
+          <button type="submit" class="flex-1 h-12 bg-primary text-white rounded-xl font-headline-md cursor-pointer">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8080/api/v1';
+    let goalsData = [];
+
+    // 获取访问令牌
+    function getAccessToken() {
+      let token = localStorage.getItem('access_token');
+      if (token && token.includes('|')) {
+        token = token.split('|')[0];
+      }
+      return token;
+    }
+
+    // 格式化金额
+    function formatCurrency(amount) {
+      if (amount === null || amount === undefined) return '¥0.00';
+      return '¥' + parseFloat(amount).toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // 获取目标图标
+    function getGoalIcon(goalType) {
+      const iconMap = {
+        1: 'home',
+        2: 'school',
+        3: 'elderly',
+        4: 'flight',
+        5: 'directions_car',
+        6: 'savings'
+      };
+      return iconMap[goalType] || 'savings';
+    }
+
+    // 获取目标颜色
+    function getGoalColor(goalType) {
+      const colorMap = {
+        1: 'bg-primary-container',
+        2: 'bg-secondary-container',
+        3: 'bg-secondary-fixed-dim',
+        4: 'bg-tertiary-container',
+        5: 'bg-primary-fixed-dim',
+        6: 'bg-tertiary-fixed-dim'
+      };
+      return colorMap[goalType] || 'bg-primary-container';
+    }
+
+    // 获取状态颜色
+    function getStatusColor(status) {
+      const colorMap = {
+        1: 'bg-tertiary-fixed',
+        2: 'bg-secondary-fixed',
+        3: 'bg-error-container'
+      };
+      return colorMap[status] || 'bg-tertiary-fixed';
+    }
+
+    // 获取状态文本
+    function getStatusText(status) {
+      const textMap = {
+        1: '进行中',
+        2: '已完成',
+        3: '已放弃'
+      };
+      return textMap[status] || '进行中';
+    }
+
+    // 显示登录提示
+    function showLoginPrompt() {
+      alert('请先登录');
+      window.top.location.href = '../pages/auth/login.html';
+    }
+
+    // 加载目标列表
+    async function loadGoals() {
+      const token = getAccessToken();
+      if (!token) {
+        showLoginPrompt();
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + '/goals?current=1&size=20', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          showLoginPrompt();
+          return;
+        }
+
+        const result = await response.json();
+        if (result.code === 200 && result.data) {
+          // 处理分页结果结构 - API返回的是 {data: {records: []}} 或直接是数组
+          let records = result.data.records || result.data;
+          // 如果records还在data内部（嵌套结构）
+          if (records && records.data) {
+            records = records.data.records || records.data;
+          }
+          if (!Array.isArray(records)) {
+            records = [];
+          }
+          goalsData = records;
+          updateGoalsUI();
+          updateSummary();
+        }
+      } catch (error) {
+        console.error('加载目标失败:', error);
+      }
+    }
+
+    // 更新目标卡片UI
+    function updateGoalsUI() {
+      const container = document.getElementById('goals-grid');
+      const addCard = container.querySelector('.border-dashed');
+
+      // 清除现有目标卡片（保留添加按钮）
+      Array.from(container.children).forEach(child => {
+        if (!child.classList.contains('border-dashed')) {
+          child.remove();
+        }
+      });
+
+      // 如果没有目标，显示空状态
+      if (goalsData.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'col-span-full text-center py-12 text-on-surface-variant';
+        emptyMsg.innerHTML = '<p class="text-body-lg">暂无目标，添加一个开始吧！</p>';
+        container.insertBefore(emptyMsg, addCard);
+        return;
+      }
+
+      // 插入目标卡片
+      goalsData.forEach(goal => {
+        const card = createGoalCard(goal);
+        container.insertBefore(card, addCard);
+      });
+    }
+
+    // 创建目标卡片
+    function createGoalCard(goal) {
+      const progress = parseFloat(goal.progress) || 0;
+      const progressOffset = 351.8 * (1 - progress / 100);
+
+      const card = document.createElement('div');
+      card.className = 'goal-card bg-white rounded-2xl p-6 soft-glow border border-white flex flex-col group transition-transform hover:scale-[1.02] cursor-pointer';
+      card.dataset.goalId = goal.id;
+
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-6">
+          <div class="w-14 h-14 rounded-2xl ${getGoalColor(goal.goalType)} flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">${getGoalIcon(goal.goalType)}</span>
+          </div>
+          <div class="px-3 py-1 rounded-full ${getStatusColor(goal.status)} text-on-tertiary-fixed-variant font-label-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">${goal.status === 1 ? 'trending_up' : goal.status === 2 ? 'check_circle' : 'cancel'}</span>
+            ${getStatusText(goal.status)}
+          </div>
+        </div>
+        <h4 class="font-headline-md text-on-surface mb-1">${goal.goalName}</h4>
+        <p class="font-body-md text-on-surface-variant mb-6">${goal.goalTypeName}</p>
+        <div class="space-y-4 flex-1">
+          <div class="flex justify-between font-label-sm text-on-surface">
+            <span>${formatCurrency(goal.currentAmount)} / ${formatCurrency(goal.targetAmount)}</span>
+            <span class="text-primary">${progress.toFixed(1)}%</span>
+          </div>
+          <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full bg-primary-container rounded-full transition-all" style="width: ${progress}%"></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-surface-variant/50">
+            <div>
+              <p class="font-label-sm text-on-surface-variant">每月储蓄</p>
+              <p class="font-headline-md text-primary text-lg">${formatCurrency(goal.monthlySuggestedAmount)}</p>
+            </div>
+            <div>
+              <p class="font-label-sm text-on-surface-variant">目标日期</p>
+              <p class="font-headline-md text-on-surface text-lg">${goal.targetDate || '-'}</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // 更新汇总信息
+    function updateSummary() {
+      if (goalsData.length === 0) return;
+
+      // 计算总体进度
+      let totalProgress = 0;
+      goalsData.forEach(goal => {
+        totalProgress += parseFloat(goal.progress) || 0;
+      });
+      const avgProgress = Math.round(totalProgress / goalsData.length);
+
+      // 更新环形进度
+      const progressOffset = 351.8 * (1 - avgProgress / 100);
+      const circleElement = document.querySelector('.goals-summary circle:last-child');
+      if (circleElement) {
+        circleElement.setAttribute('stroke-dashoffset', progressOffset);
+      }
+
+      // 更新进度百分比
+      const progressText = document.querySelector('.goals-summary .font-display-lg');
+      if (progressText) {
+        progressText.textContent = avgProgress + '%';
+      }
+    }
+
+    // 打开添加目标弹窗
+    function openAddGoalModal() {
+      document.getElementById('addGoalModal').classList.remove('hidden');
+      document.getElementById('addGoalModal').classList.add('flex');
+      // 设置最小日期为明天
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('targetDate').min = tomorrow.toISOString().split('T')[0];
+      // 设置默认日期为明天
+      document.getElementById('targetDate').value = tomorrow.toISOString().split('T')[0];
+    }
+
+    // 设置日期为今天
+    function setTodayDate() {
+      const today = new Date();
+      document.getElementById('targetDate').value = today.toISOString().split('T')[0];
+    }
+
+    // 关闭添加目标弹窗
+    function closeAddGoalModal() {
+      document.getElementById('addGoalModal').classList.add('hidden');
+      document.getElementById('addGoalModal').classList.remove('flex');
+      document.getElementById('addGoalForm').reset();
+    }
+
+    // 打开编辑目标弹窗
+    async function openEditGoalModal(goalId) {
+      const token = getAccessToken();
+      if (!token) return;
+
+      closeGoalDetailModal();
+
+      try {
+        const response = await fetch(API_BASE + '/goals/' + goalId, {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const result = await response.json();
+
+        if (result.code === 200 && result.data) {
+          const goal = result.data;
+          document.getElementById('editGoalId').value = goal.id;
+          document.getElementById('editGoalName').value = goal.goalName;
+          document.getElementById('editTargetAmount').value = goal.targetAmount;
+          document.getElementById('editTargetDate').value = goal.targetDate;
+          document.getElementById('editTargetDate').min = new Date().toISOString().split('T')[0];
+
+          document.getElementById('editGoalModal').classList.remove('hidden');
+          document.getElementById('editGoalModal').classList.add('flex');
+        }
+      } catch (error) {
+        console.error('加载目标失败:', error);
+        alert('加载目标失败');
+      }
+    }
+
+    // 关闭编辑目标弹窗
+    function closeEditGoalModal() {
+      document.getElementById('editGoalModal').classList.add('hidden');
+      document.getElementById('editGoalModal').classList.remove('flex');
+      document.getElementById('editGoalForm').reset();
+    }
+
+    // 提交编辑目标
+    async function submitEditGoal(formData) {
+      const token = getAccessToken();
+      if (!token) {
+        showLoginPrompt();
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + '/goals/' + formData.id, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        if (result.code === 200) {
+          closeEditGoalModal();
+          loadGoals();
+          alert('目标更新成功！');
+        } else {
+          alert(result.message || '更新失败');
+        }
+      } catch (error) {
+        console.error('更新目标失败:', error);
+        alert('更新目标失败，请重试');
+      }
+    }
+
+    // 提交添加目标
+    async function submitAddGoal(formData) {
+      const token = getAccessToken();
+      if (!token) {
+        showLoginPrompt();
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + '/goals', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        if (result.code === 200 || result.code === 201) {
+          closeAddGoalModal();
+          loadGoals();
+          alert('目标创建成功！');
+        } else {
+          alert(result.message || '创建失败');
+        }
+      } catch (error) {
+        console.error('创建目标失败:', error);
+        alert('创建目标失败，请重试');
+      }
+    }
+
+    // 显示目标详情
+    async function showGoalDetail(goalId) {
+      console.log('showGoalDetail called, goalId:', goalId);
+      const token = getAccessToken();
+      if (!token) {
+        console.log('No token found');
+        return;
+      }
+
+      try {
+        const [goalResponse, progressResponse] = await Promise.all([
+          fetch(API_BASE + '/goals/' + goalId, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+          }),
+          fetch(API_BASE + '/goals/' + goalId + '/progress', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+          })
+        ]);
+
+        const goalResult = await goalResponse.json();
+        const progressResult = await progressResponse.json();
+
+        if (goalResult.code === 200 && progressResult.code === 200) {
+          displayGoalDetail(goalResult.data, progressResult.data);
+        }
+      } catch (error) {
+        console.error('加载目标详情失败:', error);
+      }
+    }
+
+    // 显示目标详情内容
+    function displayGoalDetail(goal, progress) {
+      document.getElementById('detailGoalName').textContent = goal.goalName;
+
+      const container = document.getElementById('goalDetailContent');
+      container.innerHTML = `
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 rounded-2xl ${getGoalColor(goal.goalType)} flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary-container text-4xl" style="font-variation-settings: 'FILL' 1;">${getGoalIcon(goal.goalType)}</span>
+          </div>
+          <div>
+            <h3 class="font-headline-md text-on-surface">${goal.goalName}</h3>
+            <p class="text-on-surface-variant">${goal.goalTypeName} · ${getStatusText(goal.status)}</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container rounded-2xl p-6 space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-on-surface-variant">当前进度</span>
+            <span class="font-headline-md text-primary">${parseFloat(goal.progress || 0).toFixed(1)}%</span>
+          </div>
+          <div class="h-3 w-full bg-surface rounded-full overflow-hidden">
+            <div class="h-full bg-primary-container rounded-full" style="width: ${goal.progress || 0}%"></div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 pt-4">
+            <div>
+              <p class="font-label-sm text-on-surface-variant">当前金额</p>
+              <p class="font-headline-md text-on-surface">${formatCurrency(goal.currentAmount)}</p>
+            </div>
+            <div>
+              <p class="font-label-sm text-on-surface-variant">目标金额</p>
+              <p class="font-headline-md text-on-surface">${formatCurrency(goal.targetAmount)}</p>
+            </div>
+          </div>
+
+          ${progress ? `
+          <div class="border-t border-surface-variant/50 pt-4 mt-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="font-label-sm text-on-surface-variant">剩余金额</p>
+                <p class="font-headline-md text-on-surface">${formatCurrency(progress.remainingAmount)}</p>
+              </div>
+              <div>
+                <p class="font-label-sm text-on-surface-variant">剩余月份</p>
+                <p class="font-headline-md text-on-surface">${progress.remainingMonths || 0} 个月</p>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+
+        ${progress && progress.suggestions && progress.suggestions.length > 0 ? `
+        <div class="mt-4">
+          <h4 class="font-label-sm text-on-surface-variant mb-2">建议</h4>
+          <div class="space-y-2">
+            ${progress.suggestions.map(s => `
+              <div class="flex items-start gap-2 text-body-sm text-on-surface">
+                <span class="material-symbols-outlined text-tertiary text-sm">lightbulb</span>
+                <span>${s}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="flex gap-4 pt-6">
+          <button onclick="openEditGoalModal(${goal.id})" class="flex-1 h-12 bg-secondary-container text-on-secondary-container rounded-xl font-headline-md cursor-pointer">编辑</button>
+          <button onclick="deleteGoal(${goal.id})" class="flex-1 h-12 bg-error-container text-on-error-container rounded-xl font-headline-md cursor-pointer">删除</button>
+        </div>
+        <button onclick="closeGoalDetailModal()" class="w-full h-12 mt-2 bg-primary text-white rounded-xl font-headline-md cursor-pointer">关闭</button>
+      `;
+
+      document.getElementById('goalDetailModal').classList.remove('hidden');
+      document.getElementById('goalDetailModal').classList.add('flex');
+    }
+
+    // 关闭目标详情弹窗
+    function closeGoalDetailModal() {
+      document.getElementById('goalDetailModal').classList.add('hidden');
+      document.getElementById('goalDetailModal').classList.remove('flex');
+    }
+
+    // 删除目标
+    async function deleteGoal(goalId) {
+      if (!confirm('确定要删除这个目标吗？')) return;
+
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch(API_BASE + '/goals/' + goalId, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (response.ok) {
+          closeGoalDetailModal();
+          loadGoals();
+          alert('目标已删除');
+        } else {
+          alert('删除失败');
+        }
+      } catch (error) {
+        console.error('删除目标失败:', error);
+        alert('删除失败，请重试');
+      }
+    }
+
+    // 页面加载完成后获取数据
+    document.addEventListener('DOMContentLoaded', function() {
+      loadGoals();
+
+      // 添加目标按钮
+      document.getElementById('addGoalBtn').addEventListener('click', openAddGoalModal);
+      document.querySelector('.border-dashed').addEventListener('click', openAddGoalModal);
+
+      // 目标卡片点击事件委托
+      document.getElementById('goals-grid').addEventListener('click', function(e) {
+        const card = e.target.closest('.goal-card');
+        if (card) {
+          const goalId = parseInt(card.dataset.goalId);
+          showGoalDetail(goalId);
+        }
+      });
+
+      // 表单提交
+      document.getElementById('addGoalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = {
+          goalName: document.getElementById('goalName').value,
+          goalType: parseInt(document.getElementById('goalType').value),
+          targetAmount: parseFloat(document.getElementById('targetAmount').value),
+          targetDate: document.getElementById('targetDate').value,
+          currentAmount: parseFloat(document.getElementById('currentAmount').value) || 0
+        };
+        submitAddGoal(formData);
+      });
+
+      // 编辑目标表单提交
+      document.getElementById('editGoalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = {
+          id: parseInt(document.getElementById('editGoalId').value),
+          goalName: document.getElementById('editGoalName').value,
+          targetAmount: parseFloat(document.getElementById('editTargetAmount').value),
+          targetDate: document.getElementById('editTargetDate').value
+        };
+        submitEditGoal(formData);
+      });
+    });
+  </script>
+</body>
+
+</html>

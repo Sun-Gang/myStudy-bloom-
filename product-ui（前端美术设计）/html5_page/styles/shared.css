@@ -1,0 +1,81 @@
+/* ==========================================
+   Bloom Finance - Shared Styles
+   Common CSS utilities and theme styles
+   ========================================== */
+
+/* Material Symbols Outlined - Default variation */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Soft glow effect for cards */
+.soft-glow {
+  box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4);
+}
+
+.soft-glow-pink {
+  box-shadow: 0 20px 40px -10px rgba(240, 208, 216, 0.6);
+}
+
+/* Glass effect for navigation */
+.glass-nav {
+  background: rgba(255, 248, 248, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+/* Input focus styles */
+.bloom-input-focus:focus-within {
+  background-color: white;
+  box-shadow: 0 0 0 2px #864e5a;
+}
+
+/* Sakura petal decorative element */
+.sakura-petal {
+  position: absolute;
+  background: #ffb7c5;
+  border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating petal animation */
+.floating-petal {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Bouncy active state */
+.bouncy-active:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease-out;
+}
+
+/* Chart donut gradient */
+.chart-donut {
+  background: conic-gradient(
+    #ffb7c5 0% 40%,
+    #9ad9a4 40% 70%,
+    #e7e1ae 70% 85%,
+    #cdc897 85% 100%
+  );
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff0f4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f2dde4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ffb7c5;
+}

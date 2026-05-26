@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bloomfinance.bookkeeping.repository.BookkeepingTransactionRepository">
+
+    <!-- 分页查询交易记录 -->
+    <select id="findByUserId" resultType="com.bloomfinance.bookkeeping.domain.entity.BookkeepingTransactionEntity">
+        SELECT * FROM t_transaction
+        WHERE deleted = 0 AND user_id = #{userId}
+        <if test="query.startDate != null">
+            AND transaction_date &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND transaction_date &lt;= #{query.endDate}
+        </if>
+        <if test="query.transactionType != null">
+            AND transaction_type = #{query.transactionType}
+        </if>
+        ORDER BY transaction_date DESC
+    </select>
+
+    <!-- 根据账户ID查询交易记录 -->
+    <select id="findByAccountId" resultType="com.bloomfinance.bookkeeping.domain.entity.BookkeepingTransactionEntity">
+        SELECT * FROM t_transaction
+        WHERE deleted = 0 AND account_id = #{accountId}
+        ORDER BY transaction_date DESC
+    </select>
+
+    <!-- 根据用户ID和交易类型统计金额 -->
+    <select id="sumAmountByUserIdAndType" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM t_transaction
+        WHERE deleted = 0
+          AND user_id = #{userId}
+          AND transaction_type = #{transactionType}
+          AND transaction_date BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+</mapper>

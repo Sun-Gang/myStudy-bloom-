@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Bloom Finance - 资产分析</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#ead5dc",
+            "inverse-on-surface": "#ffecf2",
+            "secondary-container": "#e7e1ae",
+            "primary-container": "#ffb7c5",
+            "tertiary-fixed-dim": "#96d5a0",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#3a2d32",
+            "on-tertiary-container": "#256036",
+            "on-secondary-fixed-variant": "#4b4822",
+            "outline-variant": "#d6c2c4",
+            "error-container": "#ffdad6",
+            "secondary": "#636037",
+            "on-secondary-fixed": "#1e1c00",
+            "surface-container-low": "#fff0f4",
+            "surface-container-highest": "#f2dde4",
+            "surface-container-high": "#f8e3ea",
+            "on-surface": "#24181d",
+            "secondary-fixed": "#eae4b1",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#00210b",
+            "primary-fixed-dim": "#fbb3c1",
+            "on-primary": "#ffffff",
+            "background": "#fff8f8",
+            "surface-container": "#fee8f0",
+            "primary-fixed": "#ffd9df",
+            "surface-tint": "#864e5a",
+            "surface": "#fff8f8",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#b2f2bb",
+            "on-background": "#24181d",
+            "on-secondary-container": "#67643b",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-container": "#7b4551",
+            "on-error": "#ffffff",
+            "tertiary": "#2f6a3f",
+            "on-primary-fixed": "#360c19",
+            "outline": "#837375",
+            "surface-bright": "#fff8f8",
+            "primary": "#864e5a",
+            "surface-variant": "#f2dde4",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#514345",
+            "inverse-primary": "#fbb3c1",
+            "on-primary-fixed-variant": "#6b3743",
+            "secondary-fixed-dim": "#cdc897",
+            "tertiary-container": "#9ad9a4",
+            "on-tertiary-fixed-variant": "#145129"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base": "8px",
+            "element-gap": "16px",
+            "section-gap": "40px",
+            "container-padding": "24px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "body-lg": ["Be Vietnam Pro"],
+            "body-md": ["Be Vietnam Pro"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-sm": ["Be Vietnam Pro"]
+          },
+          "fontSize": {
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #fff8f8;
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    .soft-glow {
+      box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .chart-donut {
+      background: conic-gradient(#ffb7c5 0% 40%,
+          #9ad9a4 40% 70%,
+          #e7e1ae 70% 85%,
+          #cdc897 85% 100%);
+    }
+
+    iframe {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="font-body-md text-on-surface">
+  <!-- Sidebar Navigation (iframe) -->
+  <iframe id="sidebar-iframe" src="../components/sidebar.html" class="fixed left-0 top-0 h-screen w-[288px] z-40" frameborder="0" scrolling="no"></iframe>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-[288px] min-h-screen">
+    <!-- Header (iframe) -->
+    <iframe id="header-iframe" src="../components/header.html" class="sticky top-0 z-40 w-full h-[72px]" frameborder="0" scrolling="no"></iframe>
+
+    <!-- Bento Grid Layout -->
+    <div class="p-container-padding">
+    <div class="grid grid-cols-12 gap-gutter">
+      <!-- Performance Trend Line Chart -->
+      <section class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-[32px] p-container-padding soft-glow relative overflow-hidden">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h3 class="font-headline-md text-headline-md text-primary">表现趋势</h3>
+            <p class="text-on-surface-variant font-label-sm">过去6个月增长</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="px-4 py-1 bg-primary-container text-on-primary-container rounded-full text-label-sm cursor-pointer">月度</span>
+            <span class="px-4 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-label-sm cursor-pointer">周度</span>
+          </div>
+        </div>
+        <!-- Mockup Line Chart -->
+        <div class="h-64 w-full flex items-end justify-between gap-4 px-4">
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[40%] group-hover:h-[45%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">1月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[55%] group-hover:h-[60%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">2月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[48%] group-hover:h-[53%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">3月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[70%] group-hover:h-[75%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">4月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[85%] group-hover:h-[90%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">5月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2 group">
+            <div class="w-full bg-primary-container/20 rounded-t-full relative h-32">
+              <div class="absolute bottom-0 w-full bg-primary rounded-t-full h-[78%] group-hover:h-[83%] transition-all duration-300"></div>
+            </div>
+            <span class="text-label-sm text-on-surface-variant">6月</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Asset Allocation Donut Chart -->
+      <section class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-[32px] p-container-padding soft-glow flex flex-col items-center justify-center">
+        <h3 class="font-headline-md text-headline-md text-primary mb-6 self-start">资产配置</h3>
+        <div class="relative w-48 h-48 rounded-full chart-donut flex items-center justify-center mb-8">
+          <div class="w-32 h-32 bg-surface-container-lowest rounded-full flex flex-col items-center justify-center">
+            <span class="text-label-sm text-on-surface-variant">总价值</span>
+            <span class="font-headline-md text-primary">¥124,500</span>
+          </div>
+        </div>
+        <div class="w-full space-y-3">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-primary-container"></div>
+              <span class="text-body-md">股票</span>
+            </div>
+            <span class="font-bold">40%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-tertiary-container"></div>
+              <span class="text-body-md">储蓄</span>
+            </div>
+            <span class="font-bold">30%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-secondary-container"></div>
+              <span class="text-body-md">债券</span>
+            </div>
+            <span class="font-bold">15%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-secondary-fixed-dim"></div>
+              <span class="text-body-md">其他</span>
+            </div>
+            <span class="font-bold">15%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Risk Indicator Cards -->
+      <section class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-gutter mt-4">
+        <div class="bg-tertiary-container/30 p-container-padding rounded-[32px] border-2 border-tertiary-fixed-dim/20 flex items-center gap-6">
+          <div class="p-4 bg-on-tertiary rounded-2xl text-tertiary-fixed-dim">
+            <span class="material-symbols-outlined scale-150">verified_user</span>
+          </div>
+          <div>
+            <p class="text-label-sm text-on-tertiary-container uppercase tracking-widest">风险等级</p>
+            <h4 class="font-headline-md text-on-tertiary-container">中低风险</h4>
+          </div>
+        </div>
+        <div class="bg-primary-container/30 p-container-padding rounded-[32px] border-2 border-primary-fixed-dim/20 flex items-center gap-6">
+          <div class="p-4 bg-on-primary rounded-2xl text-primary-fixed-dim">
+            <span class="material-symbols-outlined scale-150">trending_up</span>
+          </div>
+          <div>
+            <p class="text-label-sm text-on-primary-container uppercase tracking-widest">预计收益</p>
+            <h4 class="font-headline-md text-on-primary-container">+12.4% p.a.</h4>
+          </div>
+        </div>
+        <div class="bg-secondary-container/30 p-container-padding rounded-[32px] border-2 border-secondary-fixed-dim/20 flex items-center gap-6">
+          <div class="p-4 bg-on-secondary rounded-2xl text-secondary-fixed-dim">
+            <span class="material-symbols-outlined scale-150">shield_moon</span>
+          </div>
+          <div>
+            <p class="text-label-sm text-on-secondary-container uppercase tracking-widest">稳定性</p>
+            <h4 class="font-headline-md text-on-secondary-container">极强</h4>
+          </div>
+        </div>
+      </section>
+
+      <!-- Portfolio Breakdown Table -->
+      <section class="col-span-12 bg-surface-container-lowest rounded-[32px] p-container-padding soft-glow mt-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-headline-md text-headline-md text-primary">投资组合详情</h3>
+          <button class="text-primary font-bold flex items-center gap-1 hover:underline">
+            查看历史 <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+        <div class="overflow-hidden">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-on-surface-variant border-b border-surface-container-highest">
+                <th class="pb-4 font-label-sm uppercase">资产名称</th>
+                <th class="pb-4 font-label-sm uppercase text-center">占比</th>
+                <th class="pb-4 font-label-sm uppercase text-center">金额</th>
+                <th class="pb-4 font-label-sm uppercase text-right">涨跌 (24h)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container-high">
+              <tr class="group hover:bg-surface-container-low transition-colors cursor-pointer">
+                <td class="py-6 flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">token</span>
+                  </div>
+                  <div>
+                    <p class="font-body-md font-bold">科技成长基金</p>
+                    <p class="text-label-sm text-on-surface-variant">全球股票</p>
+                  </div>
+                </td>
+                <td class="py-6 text-center">
+                  <div class="w-24 bg-surface-container-high h-2 rounded-full mx-auto">
+                    <div class="bg-primary h-2 rounded-full" style="width: 65%;"></div>
+                  </div>
+                </td>
+                <td class="py-6 text-center font-bold">¥45,200.00</td>
+                <td class="py-6 text-right text-tertiary-container font-bold">+2.45%</td>
+              </tr>
+              <tr class="group hover:bg-surface-container-low transition-colors cursor-pointer">
+                <td class="py-6 flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+                    <span class="material-symbols-outlined">house</span>
+                  </div>
+                  <div>
+                    <p class="font-body-md font-bold">房地产REITs</p>
+                    <p class="text-label-sm text-on-surface-variant">房产</p>
+                  </div>
+                </td>
+                <td class="py-6 text-center">
+                  <div class="w-24 bg-surface-container-high h-2 rounded-full mx-auto">
+                    <div class="bg-tertiary h-2 rounded-full" style="width: 30%;"></div>
+                  </div>
+                </td>
+                <td class="py-6 text-center font-bold">¥32,150.00</td>
+                <td class="py-6 text-right text-error font-bold">-0.12%</td>
+              </tr>
+              <tr class="group hover:bg-surface-container-low transition-colors cursor-pointer">
+                <td class="py-6 flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined">payments</span>
+                  </div>
+                  <div>
+                    <p class="font-body-md font-bold">应急缓冲金</p>
+                    <p class="text-label-sm text-on-surface-variant">现金</p>
+                  </div>
+                </td>
+                <td class="py-6 text-center">
+                  <div class="w-24 bg-surface-container-high h-2 rounded-full mx-auto">
+                    <div class="bg-secondary h-2 rounded-full" style="width: 15%;"></div>
+                  </div>
+                </td>
+                <td class="py-6 text-center font-bold">¥12,000.00</td>
+                <td class="py-6 text-right text-tertiary-container font-bold">+0.05%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+  </main>
+
+  <!-- Contextual FAB (Only for main screens) -->
+  <button id="aiChatBtn" class="fixed bottom-10 right-10 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform group cursor-pointer">
+    <span class="material-symbols-outlined scale-125">smart_toy</span>
+    <span class="absolute right-20 bg-surface-container-lowest text-primary px-4 py-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold">咨询 Bloom AI</span>
+  </button>
+
+  <!-- AI Chat Modal -->
+  <div id="aiChatModal" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="absolute right-0 bottom-0 w-full max-w-md h-[600px] bg-surface-container-lowest rounded-l-3xl flex flex-col soft-glow">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-white">smart_toy</span>
+          </div>
+          <div>
+            <h3 class="font-headline-md text-on-surface">Bloom AI</h3>
+            <p class="text-label-sm text-tertiary">在线</p>
+          </div>
+        </div>
+        <button onclick="closeAIChat()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant">close</span>
+        </button>
+      </div>
+
+      <!-- Chat Messages -->
+      <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <!-- AI Welcome Message -->
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white text-sm">smart_toy</span>
+          </div>
+          <div class="bg-surface-container rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+            <p class="text-body-md text-on-surface">您好！我是 Bloom AI 财务助手。请问有什么可以帮您的？您可以问我关于收支分析、预算建议、财务健康等方面的的问题。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="px-6 pb-2">
+        <div class="flex flex-wrap gap-2">
+          <button onclick="sendQuickMessage('本月支出分析')" class="px-3 py-1 bg-surface-container rounded-full text-label-sm text-on-surface-variant hover:bg-primary-container transition-colors cursor-pointer">本月支出分析</button>
+          <button onclick="sendQuickMessage('如何提高储蓄率')" class="px-3 py-1 bg-surface-container rounded-full text-label-sm text-on-surface-variant hover:bg-primary-container transition-colors cursor-pointer">如何提高储蓄率</button>
+          <button onclick="sendQuickMessage('财务健康建议')" class="px-3 py-1 bg-surface-container rounded-full text-label-sm text-on-surface-variant hover:bg-primary-container transition-colors cursor-pointer">财务健康建议</button>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-4 border-t border-outline-variant">
+        <div class="flex gap-3">
+          <input id="chatInput" type="text" placeholder="输入您的问题..." class="flex-1 h-12 px-4 bg-surface-container rounded-full border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none" onkeypress="handleChatKeypress(event)">
+          <button id="sendChatBtn" onclick="sendChatMessage()" class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-container transition-colors cursor-pointer">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8080/api/v1';
+    let isAiTyping = false;
+
+    // 获取访问令牌
+    function getAccessToken() {
+      let token = localStorage.getItem('access_token');
+      if (token && token.includes('|')) {
+        token = token.split('|')[0];
+      }
+      return token;
+    }
+
+    // 格式化金额
+    function formatCurrency(amount) {
+      if (amount === null || amount === undefined) return '¥0.00';
+      return '¥' + parseFloat(amount).toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // 格式化百分比
+    function formatPercent(value) {
+      if (value === null || value === undefined) return '0%';
+      return parseFloat(value).toFixed(1) + '%';
+    }
+
+    // 显示登录提示
+    function showLoginPrompt() {
+      alert('请先登录');
+      window.top.location.href = '../pages/auth/login.html';
+    }
+
+    // 获取风险等级文本
+    function getRiskLevelText(score) {
+      if (score >= 80) return '低风险';
+      if (score >= 60) return '中低风险';
+      if (score >= 40) return '中等风险';
+      if (score >= 20) return '中高风险';
+      return '高风险';
+    }
+
+    // 加载资产配置数据
+    async function loadAssetAllocation() {
+      const token = getAccessToken();
+      if (!token) {
+        showLoginPrompt();
+        return;
+      }
+
+      try {
+        const response = await fetch(API_BASE + '/assets/allocation', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          showLoginPrompt();
+          return;
+        }
+
+        const result = await response.json();
+        if (result.code === 200 && result.data) {
+          updateAllocationChart(result.data);
+        }
+      } catch (error) {
+        console.error('加载资产配置失败:', error);
+      }
+    }
+
+    // 更新资产配置圆环图
+    function updateAllocationChart(data) {
+      const totalAsset = parseFloat(data.totalAsset) || 0;
+      const items = data.allocationList || [];
+
+      // 更新总价值
+      const totalValueEl = document.querySelector('.chart-donut + div .font-headline-md');
+      if (totalValueEl) {
+        totalValueEl.textContent = formatCurrency(totalAsset);
+      }
+
+      // 计算颜色和百分比
+      const colors = ['#ffb7c5', '#9ad9a4', '#e7e1ae', '#cdc897'];
+      let gradientParts = [];
+      let legendHTML = '';
+      let currentPercent = 0;
+
+      items.forEach((item, index) => {
+        const percent = parseFloat(item.percentage) || 0;
+        const nextPercent = currentPercent + percent;
+
+        // 颜色映射：SAVINGS->粉, SECURITIES->绿, FUND->黄, 其他->灰
+        let color = colors[index % colors.length];
+        if (item.type === 'SECURITIES') color = '#9ad9a4';
+        else if (item.type === 'SAVINGS') color = '#ffb7c5';
+        else if (item.type === 'FUND') color = '#e7e1ae';
+        else color = '#cdc897';
+
+        gradientParts.push(`${color} ${currentPercent}% ${nextPercent}%`);
+
+        // 更新图例
+        legendHTML += `
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full" style="background-color: ${color}"></div>
+              <span class="text-body-md">${item.typeName}</span>
+            </div>
+            <span class="font-bold">${formatPercent(percent)}</span>
+          </div>
+        `;
+
+        currentPercent = nextPercent;
+      });
+
+      // 更新圆环图
+      const chartDonut = document.querySelector('.chart-donut');
+      if (chartDonut) {
+        chartDonut.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+      }
+
+      // 更新图例
+      const legendContainer = document.querySelector('.chart-donut').closest('.flex.flex-col.items-center.justify-center').querySelector('.w-full.space-y-3');
+      if (legendContainer) {
+        legendContainer.innerHTML = legendHTML;
+      }
+    }
+
+    // 加载健康评分数据
+    async function loadHealthScore() {
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch(API_BASE + '/assets/health-score?period=MONTH', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.code === 200 && result.data) {
+            updateRiskIndicators(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('加载健康评分失败:', error);
+      }
+    }
+
+    // 更新风险指标卡片
+    function updateRiskIndicators(data) {
+      const totalScore = data.totalScore || 0;
+      const rating = data.rating || '未知';
+      const dimensions = data.dimensions || [];
+
+      // 风险等级卡片
+      const riskCard = document.querySelector('.bg-tertiary-container\\/30');
+      if (riskCard) {
+        const riskLevel = getRiskLevelText(totalScore);
+        const h4 = riskCard.querySelector('.font-headline-md');
+        if (h4) h4.textContent = riskLevel;
+      }
+
+      // 预计收益卡片 (使用资产配置得分)
+      const incomeCard = document.querySelector('.bg-primary-container\\/30');
+      if (incomeCard) {
+        const allocDim = dimensions.find(d => d.dimension === 'asset_allocation');
+        const expectedReturn = allocDim ? Math.round(allocDim.score / 10) : Math.round(totalScore / 10);
+        const h4 = incomeCard.querySelector('.font-headline-md');
+        if (h4) h4.textContent = `+${expectedReturn}.4% p.a.`;
+      }
+
+      // 稳定性卡片 (使用负债率得分)
+      const stabilityCard = document.querySelector('.bg-secondary-container\\/30');
+      if (stabilityCard) {
+        const debtDim = dimensions.find(d => d.dimension === 'debt_ratio');
+        const stability = debtDim && debtDim.score >= 80 ? '极强' : debtDim && debtDim.score >= 60 ? '良好' : '一般';
+        const h4 = stabilityCard.querySelector('.font-headline-md');
+        if (h4) h4.textContent = stability;
+      }
+    }
+
+    // 加载月度趋势数据
+    async function loadAssetTrend() {
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch(API_BASE + '/assets/trend?months=6', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.code === 200 && result.data) {
+            updateTrendChart(result.data);
+          }
+        } else {
+          // API不存在时使用mock数据
+          updateTrendChart(getMockTrendData());
+        }
+      } catch (error) {
+        console.error('加载趋势数据失败:', error);
+        updateTrendChart(getMockTrendData());
+      }
+    }
+
+    // Mock趋势数据
+    function getMockTrendData() {
+      return {
+        monthlyData: [
+          { month: '1月', netAsset: 65000, income: 12000, expense: 8000 },
+          { month: '2月', netAsset: 68000, income: 15000, expense: 9000 },
+          { month: '3月', netAsset: 72000, income: 18000, expense: 10000 },
+          { month: '4月', netAsset: 75000, income: 14000, expense: 8500 },
+          { month: '5月', netAsset: 78000, income: 16000, expense: 9500 },
+          { month: '6月', netAsset: 80000, income: 15000, expense: 8000 }
+        ]
+      };
+    }
+
+    // 更新趋势图表
+    function updateTrendChart(data) {
+      const monthlyData = data.monthlyData || [];
+      if (monthlyData.length === 0) return;
+
+      // 找到最大资产值用于计算高度比例
+      const maxAsset = Math.max(...monthlyData.map(d => d.netAsset));
+
+      // 更新每个柱状图
+      const bars = document.querySelectorAll('.flex-1.flex.flex-col.items-center.gap-2.group');
+      bars.forEach((bar, index) => {
+        if (index < monthlyData.length) {
+          const item = monthlyData[index];
+          const heightPercent = (item.netAsset / maxAsset) * 100;
+
+          // 更新柱高
+          const fillBar = bar.querySelector('.bg-primary.rounded-t-full');
+          if (fillBar) {
+            fillBar.style.height = `${heightPercent}%`;
+          }
+
+          // 更新月份标签
+          const label = bar.querySelector('.text-label-sm');
+          if (label) {
+            label.textContent = item.month;
+          }
+        }
+      });
+    }
+
+    // 页面加载完成后获取数据
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAssetAllocation();
+      loadHealthScore();
+      loadAssetTrend();
+
+      // AI聊天按钮事件
+      document.getElementById('aiChatBtn').addEventListener('click', openAIChat);
+    });
+
+    // 打开AI聊天窗口
+    function openAIChat() {
+      const modal = document.getElementById('aiChatModal');
+      modal.classList.remove('hidden');
+      document.getElementById('chatInput').focus();
+    }
+
+    // 关闭AI聊天窗口
+    function closeAIChat() {
+      document.getElementById('aiChatModal').classList.add('hidden');
+    }
+
+    // 发送聊天消息
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (!message || isAiTyping) return;
+
+      addUserMessage(message);
+      input.value = '';
+      await getAIResponse(message);
+    }
+
+    // 发送快捷消息
+    async function sendQuickMessage(message) {
+      if (isAiTyping) return;
+      addUserMessage(message);
+      await getAIResponse(message);
+    }
+
+    // 处理回车键发送
+    function handleChatKeypress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendChatMessage();
+      }
+    }
+
+    // 添加用户消息到聊天界面
+    function addUserMessage(message) {
+      const container = document.getElementById('chatMessages');
+      const userMsg = document.createElement('div');
+      userMsg.className = 'flex gap-3 justify-end';
+      userMsg.innerHTML = `
+        <div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-none p-4 max-w-[80%]">
+          <p class="text-body-md">${escapeHtml(message)}</p>
+        </div>
+        <div class="w-8 h-8 bg-tertiary rounded-full flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-white text-sm">person</span>
+        </div>
+      `;
+      container.appendChild(userMsg);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // 添加AI消息到聊天界面
+    function addAIMessage(message) {
+      const container = document.getElementById('chatMessages');
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'flex gap-3';
+      aiMsg.innerHTML = `
+        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-white text-sm">smart_toy</span>
+        </div>
+        <div class="bg-surface-container rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+          <p class="text-body-md text-on-surface typing-effect"></p>
+        </div>
+      `;
+      container.appendChild(aiMsg);
+      container.scrollTop = container.scrollHeight;
+      return aiMsg.querySelector('.typing-effect');
+    }
+
+    // 获取AI回复
+    async function getAIResponse(message) {
+      isAiTyping = true;
+      const sendBtn = document.getElementById('sendChatBtn');
+      sendBtn.style.opacity = '0.5';
+      sendBtn.style.pointerEvents = 'none';
+
+      const typingElement = addAIMessage('正在思考...');
+
+      try {
+        const token = getAccessToken();
+        const response = await fetch(API_BASE + '/ai/chat', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: message })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.code === 200 && result.data) {
+            typingElement.textContent = '';
+            await typeText(typingElement, result.data.reply);
+          } else {
+            typingElement.textContent = '抱歉，AI服务暂时不可用。';
+          }
+        } else {
+          typingElement.textContent = '抱歉，AI服务暂时不可用。';
+        }
+      } catch (error) {
+        console.error('AI聊天失败:', error);
+        typingElement.textContent = '抱歉，连接AI服务失败，请稍后重试。';
+      }
+
+      isAiTyping = false;
+      sendBtn.style.opacity = '1';
+      sendBtn.style.pointerEvents = 'auto';
+    }
+
+    // 打字机效果
+    async function typeText(element, text) {
+      const chars = text.split('');
+      for (let i = 0; i < chars.length; i++) {
+        element.textContent += chars[i];
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+    }
+
+    // HTML转义
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+
+</html>

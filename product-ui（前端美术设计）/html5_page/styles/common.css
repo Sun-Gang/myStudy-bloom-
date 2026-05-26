@@ -1,0 +1,51 @@
+/* Bloom Finance - Common Styles */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Tailwind CSS via CDN */
+@import url('https://cdn.tailwindcss.com?plugins=forms,container-queries');
+
+/* Custom CSS Variables and Utilities */
+.soft-glow {
+  box-shadow: 0 20px 40px rgba(240, 208, 216, 0.4);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Hide default Tailwind styles for iframe components */
+.sidebar-iframe {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 288px;
+  height: 100vh;
+  border: none;
+  z-index: 40;
+}
+
+.header-iframe {
+  width: 100%;
+  border: none;
+}
+
+/* Prevent body scroll when components are loaded */
+body {
+  overflow-x: hidden;
+}
+
+/* Ensure main content doesn't overlap with fixed sidebar */
+.main-content {
+  margin-left: 288px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+  .sidebar-iframe {
+    display: none;
+  }
+}
